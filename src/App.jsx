@@ -34,7 +34,7 @@ const App = () => {
     const [path, setPath] = useState([])
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
-
+    const initialGPS = React.useRef(false)
     const [modal, setModal] = useState({ type: null })
     const [currentDest, setCurrentDest] = useState(null)
 
@@ -64,12 +64,22 @@ const App = () => {
             )
         })
         socket.on('gps', (x) => {
-            setGPS(x)
+            // if(modal.type!=='pullover' ){
+                // if(!initialGPS.current){
+                  //  setGPS(x)
+                    // initialGPS.current = true
+                // }else{
+                
+                        setGPS(x)
+               
+                // }
+            // }
         })
         socket.on('ui-init', (data) => {
             setState(data)
             if (data.state === 'transit-finish') {
                 modal.type = 'transit-finish'
+                setCurrentDest(null)
             }
         })
         socket.on('disconnect', () => {
@@ -95,7 +105,8 @@ const App = () => {
                 left={x - 15}
                 top={y}
                 rounded={8}
-                px={2}
+                fontSize='4xl'
+                px={5}
                 py={1}
                 onClick={() => {
                     setModal({ type: 'destination-pick', destination: id })
@@ -109,7 +120,8 @@ const App = () => {
 
     const Cart = () => {
         const { x, y } = gpsToPixels(gps)
-        console.log(x, y)
+   //
+   //  console.log(x, y)
         return (
             <Circle bg="orange" left={x - 19} top={y - 19} position="absolute" p="8px" boxShadow="dark-lg">
                 <Icon as={RiTaxiFill} boxSize={6} color="black" />
