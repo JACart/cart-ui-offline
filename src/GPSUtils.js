@@ -1,8 +1,8 @@
 export function convertGeoToPixel(
     latitude,
     longitude,
-    mapWidth = 1583, // in pixels
-    mapHeight = 909, // in pixels
+    mapWidth = 1833, // in pixels 1583
+    mapHeight = 909, // in pixels 909
     mapLonLeft = -78.864095, // in degrees
     mapLonDelta = -78.859849 + 78.864095, // in degrees (mapLonRight - mapLonLeft);
     mapLatBottom = 38.43247, // in degrees

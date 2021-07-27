@@ -15,7 +15,7 @@ import {
     ModalHeader,
     ModalOverlay,
 } from '@chakra-ui/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
 import { convertGeoToPixel } from './GPSUtils'
@@ -25,9 +25,18 @@ import { PathLine } from 'react-svg-pathline'
 const socket = io('http://localhost:8021/ui')
 
 const App = () => {
-    const [destinations, setDestinations] = useState({})
+    const [destinations, setDestinations] = useState({
+        'home':{
+           latitude:   38.433168, longitude:-78.860980
+        }
+    })
     const [pose, setPose] = useState({ passenger: false, safe: false })
-
+    const lastGPS = useRef({
+        
+            latitude: 38.433905,
+            longitude: -78.862169,
+        
+    })
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
     const [modal, setModal] = useState({ type: null })
@@ -65,8 +74,8 @@ const App = () => {
     }, [])
 
     function gpsToPixels({ latitude, longitude }) {
-        const widthOffeset = (window.innerWidth - 1583) / 2
-        const heightOffset = (window.innerHeight - 909) / 2
+        const widthOffeset = (window.innerWidth - 1583) / 2 -120
+        const heightOffset = ((window.innerHeight - 909) / 2 ) + 70
         let { x, y } = convertGeoToPixel(latitude, longitude)
         return { x: x + widthOffeset, y: y + heightOffset }
     }
@@ -76,9 +85,11 @@ const App = () => {
         return (
             <Center
                 position="absolute"
-                bg="red"
+                bg={currentDest===id?'limegreen':'red'}
                 left={x - 15}
+                // left={x}
                 top={y}
+                // boxSize={2}
                 rounded={8}
                 fontSize="4xl"
                 px={5}
@@ -96,20 +107,18 @@ const App = () => {
     }
 
     const Cart = () => {
-        const [gps, setGPS] = useState({
-            latitude: 38.433905,
-            longitude: -78.862169,
-        })
+        const [gps, setGPS] = useState(lastGPS.current)
 
         useEffect(() => {
             socket.on('gps', (x) => {
                 setGPS(x)
+                lastGPS.current = x
             })
         }, [])
 
         const { x, y } = gpsToPixels(gps)
         return (
-            <Circle bg="orange" left={x - 19} top={y - 19} position="absolute" p="8px" boxShadow="dark-lg">
+            <Circle bg="orange" left={x - 24} top={y - 24} position="absolute" p="12px" boxShadow="dark-lg">
                 <Icon as={RiTaxiFill} boxSize={6} color="black" />
             </Circle>
         )
@@ -127,7 +136,7 @@ const App = () => {
         return (
             path.length > 0 && (
                 <svg style={{ position: 'absolute' }} viewBox="0 0 1920 1080">
-                    <PathLine points={path} stroke="#1872e4" strokeWidth="5" fill="none" r={20} />
+                    <PathLine points={path} stroke="#1872e4" strokeWidth="5" fill="none" r={5} />
                 </svg>
             )
         )
@@ -213,8 +222,10 @@ const App = () => {
     }
 
     return (
-        <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'}>
+        <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow='hidden' >
             <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
+            {state.state === 'transit-start' && <RenderPath />}
+
             {Object.keys(destinations).map((id) => {
                 return <Destination key={id} id={id} />
             })}
@@ -303,7 +314,6 @@ const App = () => {
                 />
             )}
 
-            {state.state === 'transit-start' && <RenderPath />}
         </Flex>
     )
 }
