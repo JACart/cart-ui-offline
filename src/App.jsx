@@ -16,25 +16,20 @@ import {
     ModalOverlay,
 } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
-import { RiTaxiFill } from 'react-icons/ri'
+import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
 import { convertGeoToPixel } from './GPSUtils'
 import map from './images/map.png'
 import sat from './images/sat.png'
+import { PathLine } from 'react-svg-pathline'
 const socket = io('http://localhost:8021/ui')
 
 const App = () => {
-    const [gps, setGPS] = useState({
-        latitude: 38.433905,
-        longitude: -78.862169,
-    })
-
     const [destinations, setDestinations] = useState({})
     const [pose, setPose] = useState({ passenger: false, safe: false })
-    const [path, setPath] = useState([])
+
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
-    const initialGPS = React.useRef(false)
     const [modal, setModal] = useState({ type: null })
     const [currentDest, setCurrentDest] = useState(null)
 
@@ -56,43 +51,23 @@ const App = () => {
         socket.on('pose', (x) => {
             setPose(x)
         })
-        socket.on('path', (x) => {
-            setPath(
-                x.map((x) => {
-                    return { lat: x.latitude, lng: x.longitude }
-                }),
-            )
-        })
-        socket.on('gps', (x) => {
-            // if(modal.type!=='pullover' ){
-                // if(!initialGPS.current){
-                  //  setGPS(x)
-                    // initialGPS.current = true
-                // }else{
-                
-                        setGPS(x)
-               
-                // }
-            // }
-        })
+
         socket.on('ui-init', (data) => {
             setState(data)
-            if (data.state === 'transit-finish') {
-                modal.type = 'transit-finish'
+            if (data.state === 'transit-end' || data.state === 'summon-finish') {
                 setCurrentDest(null)
             }
         })
         socket.on('disconnect', () => {
             setState({ ...state, active: false })
         })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     function gpsToPixels({ latitude, longitude }) {
         const widthOffeset = (window.innerWidth - 1583) / 2
         const heightOffset = (window.innerHeight - 909) / 2
         let { x, y } = convertGeoToPixel(latitude, longitude)
-        // console.log()
-
         return { x: x + widthOffeset, y: y + heightOffset }
     }
 
@@ -105,11 +80,13 @@ const App = () => {
                 left={x - 15}
                 top={y}
                 rounded={8}
-                fontSize='4xl'
+                fontSize="4xl"
                 px={5}
                 py={1}
                 onClick={() => {
-                    setModal({ type: 'destination-pick', destination: id })
+                    if (currentDest === null) {
+                        setModal({ type: 'destination-pick', destination: id })
+                    }
                 }}
                 cursor="pointer"
             >
@@ -119,13 +96,40 @@ const App = () => {
     }
 
     const Cart = () => {
+        const [gps, setGPS] = useState({
+            latitude: 38.433905,
+            longitude: -78.862169,
+        })
+
+        useEffect(() => {
+            socket.on('gps', (x) => {
+                setGPS(x)
+            })
+        }, [])
+
         const { x, y } = gpsToPixels(gps)
-   //
-   //  console.log(x, y)
         return (
             <Circle bg="orange" left={x - 19} top={y - 19} position="absolute" p="8px" boxShadow="dark-lg">
                 <Icon as={RiTaxiFill} boxSize={6} color="black" />
             </Circle>
+        )
+    }
+
+    const RenderPath = () => {
+        const [path, setPath] = useState([])
+        socket.on('path', (x) => {
+            setPath(
+                x.map((x) => {
+                    return gpsToPixels(x)
+                }),
+            )
+        })
+        return (
+            path.length > 0 && (
+                <svg style={{ position: 'absolute' }} viewBox="0 0 1920 1080">
+                    <PathLine points={path} stroke="#1872e4" strokeWidth="5" fill="none" r={20} />
+                </svg>
+            )
         )
     }
 
@@ -292,6 +296,14 @@ const App = () => {
                     onPress={() => {}}
                 />
             )}
+            {pose.passenger && !pose.safe && (
+                <FullScreenMessage
+                    title="Please adjust yourself and be seated properly. Unsafe pose detected."
+                    onPress={() => {}}
+                />
+            )}
+
+            {state.state === 'transit-start' && <RenderPath />}
         </Flex>
     )
 }
