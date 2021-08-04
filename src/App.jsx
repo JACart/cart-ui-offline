@@ -26,16 +26,15 @@ const socket = io('http://localhost:8021/ui')
 
 const App = () => {
     const [destinations, setDestinations] = useState({
-        'home':{
-           latitude:   38.433168, longitude:-78.860980
-        }
+        home: {
+            latitude: 38.433168,
+            longitude: -78.86098,
+        },
     })
     const [pose, setPose] = useState({ passenger: false, safe: false })
     const lastGPS = useRef({
-        
-            latitude: 38.433905,
-            longitude: -78.862169,
-        
+        latitude: 38.433905,
+        longitude: -78.862169,
     })
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
@@ -74,8 +73,8 @@ const App = () => {
     }, [])
 
     function gpsToPixels({ latitude, longitude }) {
-        const widthOffeset = (window.innerWidth - 1583) / 2 -120
-        const heightOffset = ((window.innerHeight - 909) / 2 ) + 70
+        const widthOffeset = (window.innerWidth - 1583) / 2 - 120
+        const heightOffset = (window.innerHeight - 909) / 2 + 70
         let { x, y } = convertGeoToPixel(latitude, longitude)
         return { x: x + widthOffeset, y: y + heightOffset }
     }
@@ -85,7 +84,7 @@ const App = () => {
         return (
             <Center
                 position="absolute"
-                bg={currentDest===id?'limegreen':'red'}
+                bg={currentDest === id ? 'limegreen' : 'red'}
                 left={x - 15}
                 // left={x}
                 top={y}
@@ -179,6 +178,10 @@ const App = () => {
                             <Button
                                 colorScheme="blue"
                                 mr={3}
+                                size="lg"
+                                px={12}
+                                py={7}
+                                fontSize="2xl"
                                 onClick={() => {
                                     setModal({ type: null })
                                     if (modal.type === 'destination-pick') {
@@ -192,7 +195,14 @@ const App = () => {
                             >
                                 Yes
                             </Button>
-                            <Button colorScheme="red" onClick={() => setModal({ type: null })}>
+                            <Button
+                                size="lg"
+                                px={12}
+                                py={7}
+                                fontSize="2xl"
+                                colorScheme="red"
+                                onClick={() => setModal({ type: null })}
+                            >
                                 Cancel
                             </Button>
                         </ModalFooter>
@@ -222,7 +232,7 @@ const App = () => {
     }
 
     return (
-        <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow='hidden' >
+        <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
             <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
             {state.state === 'transit-start' && <RenderPath />}
 
@@ -303,7 +313,7 @@ const App = () => {
             {!state.active && <FullScreenMessage title="Cart is offline..." />}
             {state.state === 'transit-end' && (
                 <FullScreenMessage
-                    title="You have arrived at your destination. Please exit the cart safely."
+                    title="You have arrived at your destination. Exit the cart safely or select a new destination."
                     onPress={() => {}}
                 />
             )}
@@ -313,7 +323,6 @@ const App = () => {
                     onPress={() => {}}
                 />
             )}
-
         </Flex>
     )
 }
