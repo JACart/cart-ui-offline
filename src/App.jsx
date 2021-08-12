@@ -40,7 +40,7 @@ const App = () => {
     const [view, setView] = useState(true)
     const [modal, setModal] = useState({ type: null })
     const [currentDest, setCurrentDest] = useState(null)
-
+    const pathRef = useRef([])
     const [state, setState] = useState({
         destination: '',
         active: false,
@@ -94,7 +94,11 @@ const App = () => {
                 px={5}
                 py={1}
                 onClick={() => {
-                    if (currentDest === null) {
+                    if (currentDest === null || pull) {
+                        if (pull) {
+                            setCurrentDest(null)
+                            setPull(false)
+                        }
                         setModal({ type: 'destination-pick', destination: id })
                     }
                 }}
@@ -117,25 +121,25 @@ const App = () => {
 
         const { x, y } = gpsToPixels(gps)
         return (
-            <Circle bg="orange" left={x - 24} top={y - 24} position="absolute" p="12px" boxShadow="dark-lg">
+            <Circle bg="orange" left={x - 32} top={y - 32} position="absolute" p="16px" boxShadow="dark-lg">
                 <Icon as={RiTaxiFill} boxSize={6} color="black" />
             </Circle>
         )
     }
 
     const RenderPath = () => {
-        const [path, setPath] = useState([])
+        const [path, setPath] = useState([...pathRef.current])
         socket.on('path', (x) => {
-            setPath(
-                x.map((x) => {
-                    return gpsToPixels(x)
-                }),
-            )
+            pathRef.current = x.map((x) => {
+                return gpsToPixels(x)
+            })
+
+            setPath([...pathRef.current])
         })
         return (
             path.length > 0 && (
                 <svg style={{ position: 'absolute' }} viewBox="0 0 1920 1080">
-                    <PathLine points={path} stroke="#1872e4" strokeWidth="5" fill="none" r={5} />
+                    <PathLine points={path} stroke="#10c400" strokeWidth="5" fill="none" r={5} />
                 </svg>
             )
         )
@@ -245,28 +249,32 @@ const App = () => {
                 {!view ? 'Terrain' : 'Satellite'}
             </Button>
             {currentDest && !pull && (
-                <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
-                    <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                        Driving to {currentDest}
-                    </Box>
-                    <Box
-                        bg="red.500"
-                        color="white"
-                        p={2}
-                        px={4}
-                        ml={4}
-                        rounded="lg"
-                        shadow="dark-lg"
-                        cursor="pointer"
-                        onClick={() => setModal({ type: 'pullover' })}
-                    >
-                        Pullover
-                    </Box>
-                </Flex>
+                <>
+                    <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
+                        <Box
+                            bg="red.500"
+                            color="white"
+                            p={2}
+                            px={4}
+                            ml={4}
+                            rounded="lg"
+                            shadow="dark-lg"
+                            cursor="pointer"
+                            onClick={() => setModal({ type: 'pullover' })}
+                        >
+                            Pullover
+                        </Box>
+                    </Flex>
+                    <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
+                        <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
+                            Driving to {currentDest}
+                        </Box>
+                    </Flex>
+                </>
             )}
 
             {!currentDest && (
-                <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
+                <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
                     <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
                         Choose a destination
                     </Box>
@@ -274,40 +282,47 @@ const App = () => {
             )}
 
             {pull && (
-                <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
-                    <Box
-                        bg="green.500"
-                        color="white"
-                        p={2}
-                        px={4}
-                        ml={4}
-                        rounded="lg"
-                        shadow="dark-lg"
-                        cursor="pointer"
-                        onClick={() => {
-                            setPull(false)
-                            socket.emit('pullover', false)
-                        }}
-                    >
-                        Resume
-                    </Box>
-                    <Box
-                        bg="red.500"
-                        color="white"
-                        p={2}
-                        px={4}
-                        ml={4}
-                        rounded="lg"
-                        shadow="dark-lg"
-                        cursor="pointer"
-                        onClick={() => {
-                            setCurrentDest(null)
-                            setPull(false)
-                        }}
-                    >
-                        Change Destination
-                    </Box>
-                </Flex>
+                <>
+                    <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
+                        <Box
+                            bg="green.500"
+                            color="white"
+                            p={2}
+                            px={4}
+                            ml={4}
+                            rounded="lg"
+                            shadow="dark-lg"
+                            cursor="pointer"
+                            onClick={() => {
+                                setPull(false)
+                                socket.emit('pullover', false)
+                            }}
+                        >
+                            Resume
+                        </Box>
+                        {/* <Box
+                            bg="red.500"
+                            color="white"
+                            p={2}
+                            px={4}
+                            ml={4}
+                            rounded="lg"
+                            shadow="dark-lg"
+                            cursor="pointer"
+                            onClick={() => {
+                                setCurrentDest(null)
+                                setPull(false)
+                            }}
+                        >
+                            Change Destination
+                        </Box> */}
+                    </Flex>
+                    <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
+                        <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
+                            Change Destination
+                        </Box>
+                    </Flex>
+                </>
             )}
 
             {!state.active && <FullScreenMessage title="Cart is offline..." />}
