@@ -22,7 +22,7 @@ import { convertGeoToPixel } from './GPSUtils'
 import map from './images/map.png'
 import sat from './images/sat.png'
 import { PathLine } from 'react-svg-pathline'
-const socket = io('http://localhost:8021/ui')
+const socket = io('http://localhost:8022/ui')
 
 const App = () => {
     const [destinations, setDestinations] = useState({
@@ -51,6 +51,7 @@ const App = () => {
         longitude: -78.87019348144531,
         pullover: false,
     })
+    let [voiceOn, setVoice] = useState(false);
 
     useEffect(() => {
         socket.on('get-destinations', (data) => {
@@ -69,6 +70,11 @@ const App = () => {
         socket.on('disconnect', () => {
             setState({ ...state, active: false })
         })
+
+        socket.on('listening', (data) => {
+            setVoice(data)
+        })
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -106,6 +112,18 @@ const App = () => {
             >
                 {id}
             </Center>
+        )
+    }
+
+    const Voice = () => {
+        return (
+            voiceOn && (
+                <Flex bottom={10} position="absolute" fontSize="6xl" boxSahdow="lg">
+                    <Box bg="green.300" color="White" p={2} px={40} rounded="lg" border="1px">
+                        Listening
+                    </Box>
+                </Flex>
+            )
         )
     }
 
@@ -245,6 +263,7 @@ const App = () => {
             })}
             <Cart />
             <ModalConfirm />
+            <Voice />
             <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
                 {!view ? 'Terrain' : 'Satellite'}
             </Button>
@@ -325,17 +344,19 @@ const App = () => {
                 </>
             )}
 
+
+
             {!state.active && <FullScreenMessage title="Cart is offline..." />}
             {state.state === 'transit-end' && (
                 <FullScreenMessage
                     title="You have arrived at your destination. Exit the cart safely or select a new destination."
-                    onPress={() => {}}
+                    onPress={() => { }}
                 />
             )}
             {pose.passenger && !pose.safe && (
                 <FullScreenMessage
                     title="Please adjust yourself and be seated properly. Unsafe pose detected."
-                    onPress={() => {}}
+                    onPress={() => { }}
                 />
             )}
         </Flex>
