@@ -4,6 +4,12 @@ import {
     Center,
     Circle,
     Divider,
+    Drawer,
+    DrawerCloseButton,
+    DrawerContent,
+    DrawerOverlay,
+    DrawerHeader,
+    DrawerBody,
     Flex,
     Icon,
     Image,
@@ -14,6 +20,8 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    useDisclosure,
+    Stack,
 } from '@chakra-ui/react'
 import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
@@ -79,6 +87,68 @@ const App = () => {
         let { x, y } = convertGeoToPixel(latitude, longitude)
         return { x: x + widthOffeset, y: y + heightOffset }
     }
+
+    const DestinationMenuItem = ({ id }) => {
+        return (
+            <Box>
+                <Center
+                    position="absolute"
+                    bg={currentDest === id ? 'limegreen' : 'red'}
+                    rounded={8}
+                    fontSize="4xl"
+                    px={5}
+                    py={1}
+                    onClick={() => {
+                        if (currentDest === null || pull) {
+                            if (pull) {
+                                setCurrentDest(null)
+                                setPull(false)
+                            }
+                            setModal({ type: 'destination-pick', destination: id})
+                        }
+                    }}
+                    cursor="pointer"
+                >
+                    {id}
+                </Center>
+            </Box>
+        )
+    }
+
+    function DestinationMenu() {
+        const { isOpen, onOpen, onClose } = useDisclosure()
+        const btnRef = React.useRef()
+
+        return (
+            <><Button px={20} py={10} ref={btnRef} colorScheme='teal' onClick={onOpen} fontSize='2xl'>
+                Destinations
+            </Button>
+            <Drawer
+                isOpen={isOpen}
+                placement='right'
+                onClose={onClose}
+                finalFocusRef={btnRef}
+            >
+                <DrawerOverlay></DrawerOverlay>
+                <DrawerContent>
+                    <DrawerCloseButton></DrawerCloseButton>
+                    <DrawerHeader>Available Destinations</DrawerHeader>
+
+                    <DrawerBody>
+                        <Flex>
+                            <Stack spacing={75}>
+                                {Object.keys(destinations).map((id) => {
+                                    return <DestinationMenuItem key={id} id={id} />
+                                })}
+                            </Stack>
+                        </Flex>
+                    </DrawerBody>
+                </DrawerContent>
+            </Drawer>
+            </>
+        )
+    }
+
 
     const Destination = ({ id }) => {
         const { x, y } = gpsToPixels(destinations[id])
