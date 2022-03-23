@@ -36,6 +36,7 @@ const App = () => {
         latitude: 38.433905,
         longitude: -78.862169,
     })
+    const [speed,setSpeed] = useState(9)
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
     const [modal, setModal] = useState({ type: null })
@@ -338,6 +339,22 @@ const App = () => {
                     onPress={() => {}}
                 />
             )}
+            <Flex position='absolute' top='0' left='0' m={8}>
+                <Button bg={speed===8?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
+                     socket.emit('speed', 8)
+                     setSpeed(8)
+                }}>Slower</Button>
+                <Button bg={speed===9?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
+                     socket.emit('speed', 9)
+                     setSpeed(9)
+
+                }}>Normal</Button>
+                <Button bg={speed===10?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' onClick={()=>{
+                     socket.emit('speed', 10)
+                     setSpeed(10)
+
+                }}>Faster</Button>
+            </Flex>
         </Flex>
     )
 }
