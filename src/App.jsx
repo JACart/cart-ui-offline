@@ -14,6 +14,16 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    Drawer,
+    DrawerBody,
+    DrawerHeader,
+    DrawerContent,
+    DrawerCloseButton,
+    DrawerOverlay,
+    useDisclosure,
+    Stack,
+    SimpleGrid,
+    
 } from '@chakra-ui/react'
 import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
@@ -22,7 +32,7 @@ import { convertGeoToPixel } from './GPSUtils'
 import map from './images/map.png'
 import sat from './images/sat.png'
 import { PathLine } from 'react-svg-pathline'
-const socket = io('http://localhost:8021/ui')
+const socket = io('http://localhost:8022/ui')
 
 const App = () => {
     const [destinations, setDestinations] = useState({
@@ -78,6 +88,77 @@ const App = () => {
         const heightOffset = (window.innerHeight - 909) / 2 + 70
         let { x, y } = convertGeoToPixel(latitude, longitude)
         return { x: x + widthOffeset, y: y + heightOffset }
+    }
+
+
+    const DestinationMenuItem = ({ id }) => {
+        return (
+            <Box>
+                <Center
+                    position="absolute"
+                    bg={currentDest === id ? 'limegreen' : 'red'}
+                    rounded={8}
+                    fontSize="4xl"
+                    px={5}
+                    py={1}
+                    onClick={() => {
+                        if (currentDest === null || pull) {
+                            if (pull) {
+                                setCurrentDest(null)
+                                setPull(false)
+                            }
+                            setModal({ type: 'destination-pick', destination: id })
+                        }
+                    }}
+                    cursor="pointer"
+                >
+                    {id}
+                </Center>
+            </Box>
+        )
+    }
+
+    function DestinationMenu() {
+        const { isOpen, onOpen, onClose } = useDisclosure()
+        const btnRef = React.useRef()
+
+        return (
+            <><Button px={20} py={10} ref={btnRef} colorScheme='teal' onClick={onOpen} fontSize="2xl">
+                Destinations
+            </Button>
+            <Drawer
+                isOpen={isOpen}
+                placement='right'
+                onClose={onClose}
+                finalFocusRef={btnRef}
+                size='md'
+            >
+                    <DrawerOverlay></DrawerOverlay>
+                    <DrawerContent>
+                        <DrawerCloseButton></DrawerCloseButton>
+                        <DrawerHeader>Available Destinations</DrawerHeader>
+
+
+                        <DrawerBody>
+                            <Flex>
+                                <SimpleGrid columns={2} spacingX={60} spacingY={20}>
+                                    {Object.keys(destinations).map((id) => {
+                                        console.log("Key: " + id)
+                                        return <DestinationMenuItem key={id} id={id} />
+                                    })}
+                                </SimpleGrid>
+                            </Flex>
+                        </DrawerBody>
+
+
+                        {/* <DrawerFooter>
+                            <Button varriant='outline' px={10} mr={3} onClock={onClose}>
+                                Close
+                            </Button>
+                        </DrawerFooter> */}
+                    </DrawerContent>
+                </Drawer></>
+        )
     }
 
     const Destination = ({ id }) => {
@@ -244,6 +325,7 @@ const App = () => {
             {Object.keys(destinations).map((id) => {
                 return <Destination key={id} id={id} />
             })}
+            <DestinationMenu />
             <Cart />
             <ModalConfirm />
             <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
