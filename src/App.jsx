@@ -62,6 +62,7 @@ const App = () => {
         longitude: -78.87019348144531,
         pullover: false,
     })
+    const [listening, setListening] = useState()
 
     useEffect(() => {
         socket.on('get-destinations', (data) => {
@@ -79,6 +80,10 @@ const App = () => {
         })
         socket.on('disconnect', () => {
             setState({ ...state, active: false })
+        })
+
+        socket.on('listening', (data) => {
+           setListening(data)
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -137,8 +142,6 @@ const App = () => {
                     <DrawerContent>
                         <DrawerCloseButton></DrawerCloseButton>
                         <DrawerHeader>Available Destinations</DrawerHeader>
-
-
                         <DrawerBody>
                             <Flex>
                                 <SimpleGrid columns={2} spacingX={60} spacingY={20}>
@@ -149,13 +152,6 @@ const App = () => {
                                 </SimpleGrid>
                             </Flex>
                         </DrawerBody>
-
-
-                        {/* <DrawerFooter>
-                            <Button varriant='outline' px={10} mr={3} onClock={onClose}>
-                                Close
-                            </Button>
-                        </DrawerFooter> */}
                     </DrawerContent>
                 </Drawer></>
         )
@@ -235,7 +231,7 @@ const App = () => {
                 return 'Do you want to pullover?'
             }
         }
-
+    
         return (
             <>
                 <Modal
@@ -331,6 +327,21 @@ const App = () => {
             <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
                 {!view ? 'Terrain' : 'Satellite'}
             </Button>
+            {listening && (
+                <Flex bottom={10} position="absolute" fontSize="5xl">
+                    <Box
+                            bg="green.500"
+                            color="white"
+                            p={10}
+                            px={40}
+                            ml={4}
+                            rounded="lg"
+                            shadow="dark-lg"
+                        >
+                            Listening
+                        </Box>
+                </Flex>
+            )}
             {currentDest && !pull && (
                 <>
                     <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
