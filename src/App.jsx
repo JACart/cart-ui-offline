@@ -85,6 +85,11 @@ const App = () => {
         socket.on('listening', (data) => {
            setListening(data)
         })
+
+        socket.on('change-destination', (data) => {
+            console.log("Destination changed: " + data)
+            setCurrentDest(data)
+        })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -146,7 +151,6 @@ const App = () => {
                             <Flex>
                                 <SimpleGrid columns={2} spacingX={60} spacingY={20}>
                                     {Object.keys(destinations).map((id) => {
-                                        console.log("Key: " + id)
                                         return <DestinationMenuItem key={id} id={id} />
                                     })}
                                 </SimpleGrid>
