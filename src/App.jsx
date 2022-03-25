@@ -90,6 +90,11 @@ const App = () => {
             console.log("Destination changed: " + data)
             setCurrentDest(data)
         })
+
+        socket.on('change-pullover', (data) => {
+            console.log("Pullover changed: " + data)
+            setPull(data)
+        })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
