@@ -133,16 +133,27 @@ const App = () => {
         const btnRef = React.useRef()
 
         return (
-            <><Button px={20} py={10} ref={btnRef} colorScheme='teal' onClick={onOpen} fontSize="2xl">
-                Destinations
-            </Button>
-            <Drawer
-                isOpen={isOpen}
-                placement='right'
-                onClose={onClose}
-                finalFocusRef={btnRef}
-                size='md'
-            >
+            <>
+                <Button 
+                    px={20} 
+                    py={10} 
+                    ref={btnRef} 
+                    colorScheme='teal' 
+                    onClick={onOpen} 
+                    fontSize="2xl" 
+                    position="absolute"
+                    right={10} 
+                    top={10}
+                >
+                    Destinations
+                </Button>
+                <Drawer
+                    isOpen={isOpen}
+                    placement='right'
+                    onClose={onClose}
+                    finalFocusRef={btnRef}
+                    size='md'
+                >
                     <DrawerOverlay></DrawerOverlay>
                     <DrawerContent>
                         <DrawerCloseButton></DrawerCloseButton>
@@ -157,7 +168,8 @@ const App = () => {
                             </Flex>
                         </DrawerBody>
                     </DrawerContent>
-                </Drawer></>
+                </Drawer>
+            </>
         )
     }
 
@@ -331,6 +343,7 @@ const App = () => {
             <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
                 {!view ? 'Terrain' : 'Satellite'}
             </Button>
+            
             {listening && (
                 <Flex bottom={10} position="absolute" fontSize="5xl">
                     <Box
