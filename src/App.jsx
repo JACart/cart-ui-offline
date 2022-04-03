@@ -25,11 +25,13 @@ import {
     SimpleGrid,
     
 } from '@chakra-ui/react'
+import { MapInteractionCSS } from 'react-map-interaction';
 import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
 import { convertGeoToPixel } from './GPSUtils'
-import map from './images/map.png'
+//import map from './images/map.png'
+import map from './images/newmap.jpg'
 import sat from './images/sat.png'
 import { PathLine } from 'react-svg-pathline'
 const socket = io('http://localhost:8022/ui')
@@ -335,142 +337,148 @@ const App = () => {
     }
 
     return (
-        <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
-            <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
-            {state.state === 'transit-start' && <RenderPath />}
-
-            {Object.keys(destinations).map((id) => {
-                return <Destination key={id} id={id} />
-            })}
-            <DestinationMenu />
-            <Cart />
-            <ModalConfirm />
-            <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
-                {!view ? 'Terrain' : 'Satellite'}
-            </Button>
+        <Flex>
             
-            {listening && (
-                <Flex bottom={10} position="absolute" fontSize="5xl">
-                    <Box
-                            bg="green.500"
-                            color="white"
-                            p={10}
-                            px={40}
-                            ml={4}
-                            rounded="lg"
-                            shadow="dark-lg"
-                        >
-                            Listening
-                        </Box>
-                </Flex>
-            )}
-            {currentDest && !pull && (
-                <>
-                    <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
+            <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
+                <MapInteractionCSS>
+                    <Image src={view ? map : sat} objectFit="contain" />
+                    {Object.keys(destinations).map((id) => {
+                        return <Destination key={id} id={id} />
+                    })}
+                </MapInteractionCSS>
+                {state.state === 'transit-start' && <RenderPath />}
+                
+                <DestinationMenu />
+                <Cart />
+                <ModalConfirm />
+                <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
+                    {!view ? 'Terrain' : 'Satellite'}
+                </Button>
+                
+                {listening && (
+                    <Flex bottom={10} position="absolute" fontSize="5xl">
                         <Box
-                            bg="red.500"
-                            color="white"
-                            p={2}
-                            px={4}
-                            ml={4}
-                            rounded="lg"
-                            shadow="dark-lg"
-                            cursor="pointer"
-                            onClick={() => setModal({ type: 'pullover' })}
-                        >
-                            Pullover
-                        </Box>
+                                bg="green.500"
+                                color="white"
+                                p={10}
+                                px={40}
+                                ml={4}
+                                rounded="lg"
+                                shadow="dark-lg"
+                            >
+                                Listening
+                            </Box>
                     </Flex>
+                )}
+                {currentDest && !pull && (
+                    <>
+                        <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
+                            <Box
+                                bg="red.500"
+                                color="white"
+                                p={2}
+                                px={4}
+                                ml={4}
+                                rounded="lg"
+                                shadow="dark-lg"
+                                cursor="pointer"
+                                onClick={() => setModal({ type: 'pullover' })}
+                            >
+                                Pullover
+                            </Box>
+                        </Flex>
+                        <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
+                            <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
+                                Driving to {currentDest}
+                            </Box>
+                        </Flex>
+                    </>
+                )}
+
+                {!currentDest && (
                     <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
                         <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                            Driving to {currentDest}
+                            Choose a destination
                         </Box>
                     </Flex>
-                </>
-            )}
+                )}
 
-            {!currentDest && (
-                <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
-                    <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                        Choose a destination
-                    </Box>
+                {pull && (
+                    <>
+                        <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
+                            <Box
+                                bg="green.500"
+                                color="white"
+                                p={2}
+                                px={4}
+                                ml={4}
+                                rounded="lg"
+                                shadow="dark-lg"
+                                cursor="pointer"
+                                onClick={() => {
+                                    setPull(false)
+                                    socket.emit('pullover', false)
+                                }}
+                            >
+                                Resume
+                            </Box>
+                            {/* <Box
+                                bg="red.500"
+                                color="white"
+                                p={2}
+                                px={4}
+                                ml={4}
+                                rounded="lg"
+                                shadow="dark-lg"
+                                cursor="pointer"
+                                onClick={() => {
+                                    setCurrentDest(null)
+                                    setPull(false)
+                                }}
+                            >
+                                Change Destination
+                            </Box> */}
+                        </Flex>
+                        <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
+                            <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
+                                Change Destination
+                            </Box>
+                        </Flex>
+                    </>
+                )}
+
+                {!state.active && <FullScreenMessage title="Cart is offline..." />}
+                {state.state === 'transit-end' && (
+                    <FullScreenMessage
+                        title="You have arrived at your destination. Exit the cart safely or select a new destination."
+                        onPress={() => {}}
+                    />
+                )}
+                {pose.passenger && !pose.safe && (
+                    <FullScreenMessage
+                        title="Please adjust yourself and be seated properly. Unsafe pose detected."
+                        onPress={() => {}}
+                    />
+                )}
+                <Flex position='absolute' top='0' left='0' m={8}>
+                    <Button bg={speed===8?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
+                        socket.emit('speed', 8)
+                        setSpeed(8)
+                    }}>Slower</Button>
+                    <Button bg={speed===9?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
+                        socket.emit('speed', 9)
+                        setSpeed(9)
+
+                    }}>Normal</Button>
+                    <Button bg={speed===10?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' onClick={()=>{
+                        socket.emit('speed', 10)
+                        setSpeed(10)
+
+                    }}>Faster</Button>
                 </Flex>
-            )}
-
-            {pull && (
-                <>
-                    <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
-                        <Box
-                            bg="green.500"
-                            color="white"
-                            p={2}
-                            px={4}
-                            ml={4}
-                            rounded="lg"
-                            shadow="dark-lg"
-                            cursor="pointer"
-                            onClick={() => {
-                                setPull(false)
-                                socket.emit('pullover', false)
-                            }}
-                        >
-                            Resume
-                        </Box>
-                        {/* <Box
-                            bg="red.500"
-                            color="white"
-                            p={2}
-                            px={4}
-                            ml={4}
-                            rounded="lg"
-                            shadow="dark-lg"
-                            cursor="pointer"
-                            onClick={() => {
-                                setCurrentDest(null)
-                                setPull(false)
-                            }}
-                        >
-                            Change Destination
-                        </Box> */}
-                    </Flex>
-                    <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
-                        <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                            Change Destination
-                        </Box>
-                    </Flex>
-                </>
-            )}
-
-            {!state.active && <FullScreenMessage title="Cart is offline..." />}
-            {state.state === 'transit-end' && (
-                <FullScreenMessage
-                    title="You have arrived at your destination. Exit the cart safely or select a new destination."
-                    onPress={() => {}}
-                />
-            )}
-            {pose.passenger && !pose.safe && (
-                <FullScreenMessage
-                    title="Please adjust yourself and be seated properly. Unsafe pose detected."
-                    onPress={() => {}}
-                />
-            )}
-            <Flex position='absolute' top='0' left='0' m={8}>
-                <Button bg={speed===8?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
-                     socket.emit('speed', 8)
-                     setSpeed(8)
-                }}>Slower</Button>
-                <Button bg={speed===9?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
-                     socket.emit('speed', 9)
-                     setSpeed(9)
-
-                }}>Normal</Button>
-                <Button bg={speed===10?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' onClick={()=>{
-                     socket.emit('speed', 10)
-                     setSpeed(10)
-
-                }}>Faster</Button>
             </Flex>
         </Flex>
+        
     )
 }
 export default App
