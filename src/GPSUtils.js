@@ -10,15 +10,15 @@ export function convertGeoToPixel(
 
 
 
-    // New Map UpperLeft Corner - 38.448000, -78.877802
-    // New Map UpperRight Corner - 38.448000, -78.854472
-    // New Map BottomLeft Corner - 38.429002, -78.877802
+    // New Map UpperLeft Corner 38.443381, -78.877518
+    // New Map UpperRight Corner - 38.443381, -78.856997
+    // New Map BottomLeft Corner - 38.429160, -78.877518
     
-    mapWidth = 17800, // in pixels 17800
-    mapHeight = 17871, // in pixels 17871
-    mapLonLeft = -78.877802, // in degrees
-    mapLonDelta = -78.854472 - mapLonLeft, // in degrees (mapLonRight - mapLonLeft)
-    mapLatBottom = 38.429002, // in degrees
+    mapWidth = 15351, // in pixels 15351
+    mapHeight = 13543, // in pixels 13543
+    mapLonLeft = -78.877518, // in degrees
+    mapLonDelta = -78.856997 - mapLonLeft, // in degrees (mapLonRight - mapLonLeft)
+    mapLatBottom = 38.429160, // in degrees
     mapLatBottomDegree = (mapLatBottom * Math.PI) / 180
 
 ) {

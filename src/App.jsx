@@ -104,8 +104,8 @@ const App = () => {
         // const widthOffeset = (window.innerWidth - 1583) / 2 - 120
         // const heightOffset = (window.innerHeight - 909) / 2 + 70
 
-        const widthOffeset = (window.innerWidth - 17800) / 1.5 - 120
-        const heightOffset = (window.innerHeight - 17871) / 1.5 + 70
+        const widthOffeset = (window.innerWidth - 15351) / 1.5 - 120
+        const heightOffset = (window.innerHeight - 13543) / 1.5 + 70
         let { x, y } = convertGeoToPixel(latitude, longitude)
         return { x: x + widthOffeset, y: y + heightOffset }
     }
@@ -342,10 +342,10 @@ const App = () => {
     return (
         <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
             <MapInteractionCSS
-                defaultScale={10}
-                defaultTranslation={{ x: 50, y: 50 }}
-                maxScale={20}
-                //minScale={1}
+                defaultScale={5}
+                defaultTranslation={{ x: 50, y: 250 }}
+                maxScale={5}
+                minScale={1}
                 // translationBounds={{xMin: 0, yMin: -1250, xMax: 1250, yMax: 0}}
                 showControls
                 >
