@@ -31,7 +31,8 @@ import io from 'socket.io-client'
 import { convertGeoToPixel } from './GPSUtils'
 //import map from './images/map.png'
 import map from './images/newmap.jpg'
-import sat from './images/sat.png'
+//import sat from './images/sat.png'
+import sat from './images/newsat.jpg'
 import { PathLine } from 'react-svg-pathline'
 const socket = io('http://localhost:8022/ui')
 
