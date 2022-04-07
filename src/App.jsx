@@ -107,7 +107,8 @@ const App = () => {
         const widthOffeset = (window.innerWidth - 15351) / 1.5 - 120
         const heightOffset = (window.innerHeight - 13543) / 1.5 + 70
         let { x, y } = convertGeoToPixel(latitude, longitude)
-        return { x: x + widthOffeset, y: y + heightOffset }
+        //return { x: x + widthOffeset, y: y + heightOffset }
+        return { x: x, y: y}
     }
 
 
@@ -194,9 +195,9 @@ const App = () => {
                 top={y}
                 // boxSize={2}
                 rounded={8}
-                fontSize="sm"
-                px={2}
-                py={1}
+                fontSize={6}
+                px={1}
+                py={.5}
                 onClick={() => {
                     if (currentDest === null || pull) {
                         if (pull) {
@@ -225,8 +226,8 @@ const App = () => {
 
         const { x, y } = gpsToPixels(gps)
         return (
-            <Circle bg="orange" left={x - 32} top={y - 32} position="absolute" p="16px" boxShadow="dark-lg">
-                <Icon as={RiTaxiFill} boxSize={6} color="black" />
+            <Circle bg="orange" left={x - 32} top={y - 32} position="absolute" p="8px" boxShadow="dark-lg">
+                <Icon as={RiTaxiFill} boxSize={4} color="black" />
             </Circle>
         )
     }
@@ -349,7 +350,7 @@ const App = () => {
                 defaultScale={5}
                 defaultTranslation={{ x: 50, y: 250 }}
                 maxScale={5}
-                // minScale={1}
+                minScale={1}
                 // translationBounds={{xMin: 0, yMin: -1250, xMax: 1250, yMax: 0}}
                 showControls
                 >
