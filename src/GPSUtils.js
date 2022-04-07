@@ -21,6 +21,22 @@ export function convertGeoToPixel(
     mapLatBottom = 38.429160, // in degrees
     mapLatBottomDegree = (mapLatBottom * Math.PI) / 180
 
+// ) {
+//     // in Radians
+//     var x = (longitude - mapLonLeft) * (mapWidth / mapLonDelta)
+
+//     latitude = (latitude * Math.PI) / 180
+//     var worldMapWidth = ((mapWidth / mapLonDelta) * 360) / (2 * Math.PI)
+//     var mapOffsetY =
+//         (worldMapWidth / 2) * Math.log((1 + Math.sin(mapLatBottomDegree)) / (1 - Math.sin(mapLatBottomDegree)))
+//     var y =
+//         mapHeight - ((worldMapWidth / 2) * Math.log((1 + Math.sin(latitude)) / (1 - Math.sin(latitude))) - mapOffsetY)
+
+//     return { x: x, y: y }
+// }
+
+
+//New Map
 ) {
     // in Radians
     var x = (longitude - mapLonLeft) * (mapWidth / mapLonDelta)

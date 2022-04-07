@@ -23,7 +23,6 @@ import {
     useDisclosure,
     Stack,
     SimpleGrid,
-    
 } from '@chakra-ui/react'
 import { MapInteractionCSS } from 'react-map-interaction';
 import React, { useEffect, useState, useRef } from 'react'
@@ -339,13 +338,17 @@ const App = () => {
         )
     }
 
+
+    const { scale, translation } = { scale: 5, translation : { x: 50, y: 250 }};
     return (
         <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
             <MapInteractionCSS
+                scale={scale}
+                translation={translation}
                 defaultScale={5}
                 defaultTranslation={{ x: 50, y: 250 }}
                 maxScale={5}
-                minScale={1}
+                // minScale={1}
                 // translationBounds={{xMin: 0, yMin: -1250, xMax: 1250, yMax: 0}}
                 showControls
                 >
