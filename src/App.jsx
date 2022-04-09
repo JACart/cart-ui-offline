@@ -34,6 +34,7 @@ import map from './images/newmap.jpg'
 //import sat from './images/sat.png'
 import sat from './images/newsat.jpg'
 import { PathLine } from 'react-svg-pathline'
+import './App.css'
 const socket = io('http://localhost:8022/ui')
 
 const App = () => {
@@ -195,10 +196,19 @@ const App = () => {
                 top={y}
                 // boxSize={2}
                 rounded={8}
-                fontSize={6}
-                px={1}
-                py={.5}
+                fontSize={10}
+                px={2}
+                py={1}
                 onClick={() => {
+                    if (currentDest === null || pull) {
+                        if (pull) {
+                            setCurrentDest(null)
+                            setPull(false)
+                        }
+                        setModal({ type: 'destination-pick', destination: id })
+                    }
+                }}
+                onTouchStart={() => {
                     if (currentDest === null || pull) {
                         if (pull) {
                             setCurrentDest(null)
@@ -226,7 +236,7 @@ const App = () => {
 
         const { x, y } = gpsToPixels(gps)
         return (
-            <Circle bg="orange" left={x - 32} top={y - 32} position="absolute" p="8px" boxShadow="dark-lg">
+            <Circle bg="orange" left={x} top={y} position="absolute" p="8px" boxShadow="dark-lg">
                 <Icon as={RiTaxiFill} boxSize={4} color="black" />
             </Circle>
         )
@@ -241,11 +251,13 @@ const App = () => {
 
             setPath([...pathRef.current])
         })
+        console.log(path)
         return (
             path.length > 0 && (
-                <svg style={{ position: 'absolute' }} viewBox="0 0 1920 1080">
-                    <PathLine points={path} stroke="#10c400" strokeWidth="5" fill="none" r={5} />
-                </svg>
+                
+                // <svg style={{ position: 'relative' }} viewBox="0 0 1920 1080" >
+                    <PathLine points={path} stroke="#10c400" strokeWidth="1" fill="none" r={5} />
+                // </svg>
             )
         )
     }
@@ -341,26 +353,28 @@ const App = () => {
     }
 
 
-    const { scale, translation } = { scale: 5, translation : { x: 50, y: 250 }};
+    const { scale, translation } = { scale: 1, translation : { x: 50, y: 250 }};
     return (
+        
         <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
             <MapInteractionCSS
                 scale={scale}
                 translation={translation}
-                defaultScale={5}
-                defaultTranslation={{ x: 50, y: 250 }}
-                maxScale={5}
+                maxScale={4}
                 minScale={1}
                 // translationBounds={{xMin: 0, yMin: -1250, xMax: 1250, yMax: 0}}
                 showControls
                 >
-                <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
+                <Cart />
                 {Object.keys(destinations).map((id) => {
                     return <Destination key={id} id={id} />
                 })}
+                
+                <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
                 {state.state === 'transit-start' && <RenderPath />}
-                <Cart />
+                
             </MapInteractionCSS>
+            
             <DestinationMenu />
             <ModalConfirm />
             <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
