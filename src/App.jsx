@@ -34,6 +34,7 @@ import map from './images/newmap.jpg'
 //import sat from './images/sat.png'
 import sat from './images/newsat.jpg'
 import { PathLine } from 'react-svg-pathline'
+import './App.css'
 
 const socket = io('http://localhost:8022/ui')
 
@@ -154,8 +155,8 @@ const App = () => {
                     onClick={onOpen} 
                     fontSize="2xl" 
                     position="absolute"
-                    right={10} 
-                    top={10}
+                    right={40}
+                    top={5}
                 >
                     Destinations
                 </Button>
@@ -352,19 +353,18 @@ const App = () => {
         )
     }
 
-
-    const { scale, translation } = { scale: 1, translation : { x: 50, y: 250 }};
     return (
         
         <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
             <MapInteractionCSS
-                scale={scale}
-                translation={translation}
                 maxScale={4}
                 minScale={1}
-                // translationBounds={{xMin: 0, yMin: -1250, xMax: 1250, yMax: 0}}
+                //translationBounds={{xMin: -570, xMax: 0, yMin: -1220, yMax: 0}}
+                btnClass='btnStyle'
+                
                 showControls
                 >
+                
                 <Cart />
                 {Object.keys(destinations).map((id) => {
                     return <Destination key={id} id={id} />
