@@ -34,7 +34,7 @@ import map from './images/newmap.jpg'
 //import sat from './images/sat.png'
 import sat from './images/newsat.jpg'
 import { PathLine } from 'react-svg-pathline'
-import './App.css'
+
 const socket = io('http://localhost:8022/ui')
 
 const App = () => {
