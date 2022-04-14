@@ -43,6 +43,8 @@ const App = () => {
         home: {
             latitude: 38.433168,
             longitude: -78.86098,
+            name: "Home",
+            speech: "Home",
         },
     })
     const [pose, setPose] = useState({ passenger: false, safe: false })
@@ -67,6 +69,7 @@ const App = () => {
         pullover: false,
     })
     const [listening, setListening] = useState()
+    const [mph, setMph] = useState(0)
 
     useEffect(() => {
         socket.on('get-destinations', (data) => {
@@ -99,6 +102,11 @@ const App = () => {
             console.log("Pullover changed: " + data)
             setPull(data)
         })
+
+        socket.on('mph', (data) => {
+            setMph(data)
+            console.log("MPH: " + data)
+        })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -106,8 +114,6 @@ const App = () => {
         // const widthOffeset = (window.innerWidth - 1583) / 2 - 120
         // const heightOffset = (window.innerHeight - 909) / 2 + 70
 
-        const widthOffeset = (window.innerWidth - 15351) / 1.5 - 120
-        const heightOffset = (window.innerHeight - 13543) / 1.5 + 70
         let { x, y } = convertGeoToPixel(latitude, longitude)
         //return { x: x + widthOffeset, y: y + heightOffset }
         return { x: x, y: y}
@@ -187,6 +193,7 @@ const App = () => {
     }
 
     const Destination = ({ id }) => {
+        console.log(id)
         const { x, y } = gpsToPixels(destinations[id])
         return (
             <Center
@@ -220,7 +227,7 @@ const App = () => {
                 }}
                 cursor="pointer"
             >
-                {id}
+                {destinations[id].name}
             </Center>
         )
     }
@@ -377,9 +384,14 @@ const App = () => {
             
             <DestinationMenu />
             <ModalConfirm />
-            <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
+            <Flex bottom={10} right={10} position="absolute">
+            <Box bg="gray.700" p={3} shadow="dark-lg" bottom={10} right={40} rounded="xl" px={7} position="absolute">
+                    {"MPH: " + mph}
+                </Box>
+                <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
                 {!view ? 'Terrain' : 'Satellite'}
-            </Button>
+                </Button>
+            </Flex>
             
             {listening && (
                 <Flex bottom={10} position="absolute" fontSize="5xl">
