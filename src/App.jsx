@@ -193,7 +193,6 @@ const App = () => {
     }
 
     const Destination = ({ id }) => {
-        console.log(id)
         const { x, y } = gpsToPixels(destinations[id])
         return (
             <Center
@@ -273,7 +272,7 @@ const App = () => {
     const ModalConfirm = () => {
         function getBody() {
             if (modal.type === 'destination-pick') {
-                return 'Do you want to drive to ' + modal.destination + '?'
+                return 'Do you want to drive to ' + destinations[modal.destination].name + '?'
             } else if (modal.type === 'pullover') {
                 return 'Do you want to pullover?'
             }
@@ -385,7 +384,7 @@ const App = () => {
             <DestinationMenu />
             <ModalConfirm />
             <Flex bottom={10} right={10} position="absolute">
-            <Box bg="gray.700" p={3} shadow="dark-lg" bottom={10} right={40} rounded="xl" px={7} position="absolute">
+            <Box bg="gray.100" color="black" border="1px" p={3} bottom={10} right={40} rounded="xl" px={7} position="absolute">
                     {"MPH: " + mph}
                 </Box>
                 <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
@@ -427,7 +426,7 @@ const App = () => {
                     </Flex>
                     <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
                         <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                            Driving to {currentDest}
+                            Driving to {destinations[currentDest].name}
                         </Box>
                     </Flex>
                 </>

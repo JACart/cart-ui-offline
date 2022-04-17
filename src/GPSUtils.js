@@ -40,7 +40,7 @@ export function convertGeoToPixel(
 //New Map
 ) {
     // in Radians
-    var x = (longitude - mapLonLeft) * (window.innerWidth / mapLonDelta) + 5
+    var x = (longitude - mapLonLeft) * (window.innerWidth / mapLonDelta) + 0
     
     latitude = (latitude * Math.PI) / 180
     var worldMapWidth = ((window.innerWidth / mapLonDelta) * 360) / (2 * Math.PI)
