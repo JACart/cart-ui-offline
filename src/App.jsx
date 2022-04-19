@@ -273,7 +273,7 @@ const App = () => {
     const ModalConfirm = () => {
         function getBody() {
             if (modal.type === 'destination-pick') {
-                return 'Do you want to drive to ' + modal.destination + '?'
+                return 'Do you want to drive to ' + destinations[modal.destination].name + '?'
             } else if (modal.type === 'pullover') {
                 return 'Do you want to pullover?'
             }
@@ -427,7 +427,7 @@ const App = () => {
                     </Flex>
                     <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
                         <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                            Driving to {currentDest}
+                            Driving to {destinations[currentDest].name}
                         </Box>
                     </Flex>
                 </>
