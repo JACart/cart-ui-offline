@@ -193,7 +193,6 @@ const App = () => {
     }
 
     const Destination = ({ id }) => {
-        console.log(id)
         const { x, y } = gpsToPixels(destinations[id])
         return (
             <Center
@@ -385,7 +384,7 @@ const App = () => {
             <DestinationMenu />
             <ModalConfirm />
             <Flex bottom={10} right={10} position="absolute">
-            <Box bg="gray.700" p={3} shadow="dark-lg" bottom={10} right={40} rounded="xl" px={7} position="absolute">
+            <Box bg="gray.100" color="black" border="1px" p={3} bottom={10} right={40} rounded="xl" px={7} position="absolute">
                     {"MPH: " + mph}
                 </Box>
                 <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
