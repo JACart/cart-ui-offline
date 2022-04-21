@@ -105,7 +105,6 @@ const App = () => {
 
         socket.on('mph', (data) => {
             setMph(data)
-            console.log("MPH: " + data)
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -113,7 +112,8 @@ const App = () => {
     function gpsToPixels({ latitude, longitude }) {
         // const widthOffeset = (window.innerWidth - 1583) / 2 - 120
         // const heightOffset = (window.innerHeight - 909) / 2 + 70
-
+        console.log("width: " + window.innerWidth)
+        console.log('height: ' + window.innerHeight)
         let { x, y } = convertGeoToPixel(latitude, longitude)
         //return { x: x + widthOffeset, y: y + heightOffset }
         return { x: x, y: y}
@@ -263,8 +263,8 @@ const App = () => {
             path.length > 0 && (
                 
                 // <svg style={{ position: 'relative' }} viewBox="0 0 1920 1080" >
-                    <PathLine points={path} stroke="#10c400" strokeWidth="1" fill="none" r={5} />
-                // </svg>
+                    <PathLine points={path} stroke="#10c400" strokeWidth="5" fill="none" r={5} />
+                //</svg>
             )
         )
     }
@@ -362,6 +362,7 @@ const App = () => {
     return (
         
         <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
+            
             <MapInteractionCSS
                 maxScale={4}
                 minScale={1}
@@ -377,10 +378,15 @@ const App = () => {
                 })}
                 
                 <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
-                {state.state === 'transit-start' && <RenderPath />}
+                <css><svg style={{ position: 'absolute' }} viewBox="0 0 4000 4000" >
+                    {state.state === 'transit-start' && <RenderPath/>}
+                </svg></css>
+                
                 
             </MapInteractionCSS>
-            
+            {/* <svg style={{ position: 'relative' }} viewBox="0 0 1920 1080" >
+                    {state.state === 'transit-start' && <RenderPath/>}
+                </svg> */}
             <DestinationMenu />
             <ModalConfirm />
             <Flex bottom={10} right={10} position="absolute">
