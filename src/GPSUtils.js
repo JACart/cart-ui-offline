@@ -45,7 +45,7 @@ export function convertGeoToPixel(
     latitude = (latitude * Math.PI) / 180
     var worldMapWidth = ((window.innerWidth / mapLonDelta) * 360) / (2 * Math.PI)
     var mapOffsetY =
-        (worldMapWidth / 2) * Math.log((1 + Math.sin(mapLatBottomDegree)) / (1 - Math.sin(mapLatBottomDegree))) + 900
+        (worldMapWidth / 2) * Math.log((1 + Math.sin(mapLatBottomDegree)) / (1 - Math.sin(mapLatBottomDegree))) + 950
     var y =
         window.innerHeight - ((worldMapWidth / 2) * Math.log((1 + Math.sin(latitude)) / (1 - Math.sin(latitude))) - mapOffsetY)
 
