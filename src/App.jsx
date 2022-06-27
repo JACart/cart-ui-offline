@@ -261,10 +261,7 @@ const App = () => {
         console.log(path)
         return (
             path.length > 0 && (
-                
-                // <svg style={{ position: 'relative' }} viewBox="0 0 1920 1080" >
-                    <PathLine points={path} stroke="#10c400" strokeWidth="5" fill="none" r={5} />
-                //</svg>
+                <PathLine points={path} stroke="#10c400" strokeWidth="5" fill="none" r={5} />
             )
         )
     }
@@ -378,7 +375,7 @@ const App = () => {
                 })}
                 
                 <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
-                <css><svg style={{ position: 'absolute' }} viewBox="0 0 4000 4000" >
+                <css position='relative'><svg style={{ position: 'absolute' }} viewBox="0 0 4000 4000" >
                     {state.state === 'transit-start' && <RenderPath/>}
                 </svg></css>
                 
@@ -503,21 +500,26 @@ const App = () => {
                     onPress={() => {}}
                 />
             )}
-            <Flex position='absolute' top='0' left='0' m={8}>
-                <Button bg={speed===8?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
-                    socket.emit('speed', 8)
-                    setSpeed(8)
+            <Flex position='absolute' top='0' left='0' m={12}>
+                <Button bg={speed===4?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
+                    socket.emit('speed', 4.0)
+                    setSpeed(4)
                 }}>Slower</Button>
                 <Button bg={speed===9?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
-                    socket.emit('speed', 9)
+                    socket.emit('speed', 9.0)
                     setSpeed(9)
 
                 }}>Normal</Button>
-                <Button bg={speed===10?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' onClick={()=>{
-                    socket.emit('speed', 10)
-                    setSpeed(10)
+                <Button bg={speed===11?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
+                    socket.emit('speed', 11.0)
+                    setSpeed(11)
 
                 }}>Faster</Button>
+                <Button bg={speed===14?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' onClick={()=>{
+                    socket.emit('speed', 14.0)
+                    setSpeed(14)
+                }}>Turbo</Button>
+
             </Flex>
         </Flex>
        
