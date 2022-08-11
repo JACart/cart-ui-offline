@@ -19,10 +19,17 @@ import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
 import { convertGeoToPixel } from './GPSUtils'
-import map from './images/map.png'
-import sat from './images/sat.png'
+// import map from './images/map.png'
+// import sat from './images/sat.png'
 import { PathLine } from 'react-svg-pathline'
+
+import { LatLngBounds } from 'leaflet'
+import { ImageOverlay, MapContainer } from 'react-leaflet'
+import Marker from 'react-leaflet-enhanced-marker'
+
 const socket = io('http://localhost:8021/ui')
+const position = [38.43334869007554, -78.86274221144595]
+const bounds = new LatLngBounds([38.443363, -78.87755], [38.42915035514814, -78.85702218643952])
 
 const App = () => {
     const [destinations, setDestinations] = useState({
@@ -52,6 +59,8 @@ const App = () => {
         pullover: false,
     })
 
+    const ref = useRef()
+
     useEffect(() => {
         socket.on('get-destinations', (data) => {
             setDestinations(data)
@@ -80,32 +89,26 @@ const App = () => {
     }
 
     const Destination = ({ id }) => {
-        const { x, y } = gpsToPixels(destinations[id])
         return (
-            <Center
-                position="absolute"
-                bg={currentDest === id ? 'limegreen' : 'red'}
-                left={x - 15}
-                // left={x}
-                top={y}
-                // boxSize={2}
-                rounded={8}
-                fontSize="4xl"
-                px={5}
-                py={1}
-                onClick={() => {
-                    if (currentDest === null || pull) {
-                        if (pull) {
-                            setCurrentDest(null)
-                            setPull(false)
+            <Marker
+                position={[destinations[id].latitude, destinations[id].longitude]}
+                eventHandlers={{
+                    click: () => {
+                        if (currentDest === null || pull) {
+                            if (pull) {
+                                setCurrentDest(null)
+                                setPull(false)
+                            }
+                            setModal({ type: 'destination-pick', destination: id })
                         }
-                        setModal({ type: 'destination-pick', destination: id })
-                    }
+                    },
                 }}
-                cursor="pointer"
-            >
-                {id}
-            </Center>
+                icon={
+                    <Center bg={currentDest === id ? 'limegreen' : 'red'} rounded={8} fontSize="24px" px={32} py={8}>
+                        {id}
+                    </Center>
+                }
+            ></Marker>
         )
     }
 
@@ -119,11 +122,15 @@ const App = () => {
             })
         }, [])
 
-        const { x, y } = gpsToPixels(gps)
         return (
-            <Circle bg="orange" left={x - 32} top={y - 32} position="absolute" p="16px" boxShadow="dark-lg">
-                <Icon as={RiTaxiFill} boxSize={6} color="black" />
-            </Circle>
+            <Marker
+                icon={
+                    <Circle bg="orange" position="absolute" p="10px" boxShadow="dark-lg">
+                        <Icon as={RiTaxiFill} boxSize={32} color="black" />
+                    </Circle>
+                }
+                position={[gps.latitude, gps.longitude]}
+            ></Marker>
         )
     }
 
@@ -236,71 +243,93 @@ const App = () => {
     }
 
     return (
-        <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
-            <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
-            {state.state === 'transit-start' && <RenderPath />}
+        <>
+            <MapContainer
+                style={{ height: '100vh', width: '100vw' }}
+                center={position}
+                ref={ref}
+                zoom={19}
+                maxZoom={19}
+                minZoom={19}
+            >
+                <ImageOverlay url="/newmap.jpg" bounds={bounds} zIndex={0} />
+                <Cart />
+                {Object.keys(destinations).map((id) => {
+                    return <Destination key={id} id={id} />
+                })}
+            </MapContainer>
+            <Flex
+                pointerEvents="none"
+                w="100vw"
+                h="100vh"
+                top="0"
+                left="0"
+                justify="center"
+                position="absolute"
+                overflow="hidden"
+                zIndex={1005}
+            >
+                {/* <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" /> */}
 
-            {Object.keys(destinations).map((id) => {
-                return <Destination key={id} id={id} />
-            })}
-            <Cart />
-            <ModalConfirm />
-            <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
-                {!view ? 'Terrain' : 'Satellite'}
-            </Button>
-            {currentDest && !pull && (
-                <>
-                    <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
-                        <Box
-                            bg="red.500"
-                            color="white"
-                            p={2}
-                            px={4}
-                            ml={4}
-                            rounded="lg"
-                            shadow="dark-lg"
-                            cursor="pointer"
-                            onClick={() => setModal({ type: 'pullover' })}
-                        >
-                            Pullover
-                        </Box>
-                    </Flex>
+                {state.state === 'transit-start' && <RenderPath />}
+
+                <ModalConfirm />
+                {/* <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
+                    {!view ? 'Terrain' : 'Satellite'}
+                </Button> */}
+                {currentDest && !pull && (
+                    <>
+                        <Flex left={10} bottom={10} position="absolute" fontSize="3xl" po>
+                            <Box
+                                bg="red.500"
+                                color="white"
+                                p={2}
+                                px={4}
+                                ml={4}
+                                rounded="lg"
+                                shadow="dark-lg"
+                                cursor="pointer"
+                                onClick={() => setModal({ type: 'pullover' })}
+                            >
+                                Pullover
+                            </Box>
+                        </Flex>
+                        <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
+                            <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
+                                Driving to {currentDest}
+                            </Box>
+                        </Flex>
+                    </>
+                )}
+
+                {!currentDest && (
                     <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
                         <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                            Driving to {currentDest}
+                            Choose a destination
                         </Box>
                     </Flex>
-                </>
-            )}
+                )}
 
-            {!currentDest && (
-                <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
-                    <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                        Choose a destination
-                    </Box>
-                </Flex>
-            )}
-
-            {pull && (
-                <>
-                    <Flex left={10} bottom={10} position="absolute" fontSize="3xl">
-                        <Box
-                            bg="green.500"
-                            color="white"
-                            p={2}
-                            px={4}
-                            ml={4}
-                            rounded="lg"
-                            shadow="dark-lg"
-                            cursor="pointer"
-                            onClick={() => {
-                                setPull(false)
-                                socket.emit('pullover', false)
-                            }}
-                        >
-                            Resume
-                        </Box>
-                        {/* <Box
+                {pull && (
+                    <>
+                        <Flex left={10} bottom={10} position="absolute" fontSize="3xl" pointerEvents="auto">
+                            <Box
+                                bg="green.500"
+                                color="white"
+                                p={2}
+                                px={4}
+                                ml={4}
+                                rounded="lg"
+                                shadow="dark-lg"
+                                cursor="pointer"
+                                onClick={() => {
+                                    setPull(false)
+                                    socket.emit('pullover', false)
+                                }}
+                            >
+                                Resume
+                            </Box>
+                            {/* <Box
                             bg="red.500"
                             color="white"
                             p={2}
@@ -316,29 +345,30 @@ const App = () => {
                         >
                             Change Destination
                         </Box> */}
-                    </Flex>
-                    <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
-                        <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
-                            Change Destination
-                        </Box>
-                    </Flex>
-                </>
-            )}
+                        </Flex>
+                        <Flex top={18} position="absolute" fontSize="3xl" boxShadow="lg">
+                            <Box bg="gray.100" color="black" p={2} px={4} rounded="lg" border="1px">
+                                Change Destination
+                            </Box>
+                        </Flex>
+                    </>
+                )}
 
-            {!state.active && <FullScreenMessage title="Cart is offline..." />}
-            {state.state === 'transit-end' && (
-                <FullScreenMessage
-                    title="You have arrived at your destination. Exit the cart safely or select a new destination."
-                    onPress={() => {}}
-                />
-            )}
-            {pose.passenger && !pose.safe && (
-                <FullScreenMessage
-                    title="Please adjust yourself and be seated properly. Unsafe pose detected."
-                    onPress={() => {}}
-                />
-            )}
-        </Flex>
+                {state.active && <FullScreenMessage title="Cart is offline..." />}
+                {state.state === 'transit-end' && (
+                    <FullScreenMessage
+                        title="You have arrived at your destination. Exit the cart safely or select a new destination."
+                        onPress={() => {}}
+                    />
+                )}
+                {pose.passenger && !pose.safe && (
+                    <FullScreenMessage
+                        title="Please adjust yourself and be seated properly. Unsafe pose detected."
+                        onPress={() => {}}
+                    />
+                )}
+            </Flex>
+        </>
     )
 }
 export default App
