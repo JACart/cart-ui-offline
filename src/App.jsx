@@ -254,6 +254,8 @@ const App = () => {
                 style={{ height: '100vh', width: '100vw' }}
                 center={position}
                 ref={ref}
+                dragging={false}
+                zoomControl={false}
                 zoom={19}
                 maxZoom={19}
                 minZoom={19}
