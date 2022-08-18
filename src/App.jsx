@@ -24,12 +24,13 @@ import { convertGeoToPixel } from './GPSUtils'
 import { PathLine } from 'react-svg-pathline'
 
 import { LatLngBounds } from 'leaflet'
-import { ImageOverlay, MapContainer } from 'react-leaflet'
+import { ImageOverlay, MapContainer,Polyline, Pane } from 'react-leaflet'
 import Marker from 'react-leaflet-enhanced-marker'
 
-const socket = io('http://localhost:8021/ui')
-const position = [38.43334869007554, -78.86274221144595]
-const bounds = new LatLngBounds([38.443363, -78.87755], [38.42915035514814, -78.85702218643952])
+const socket = io('http://localhost:8022/ui')
+
+const position = [38.4330762517706, -78.86152024308338]
+const bounds = new LatLngBounds([38.434993460023776, -78.86510684108488], [38.431858478265596, -78.85740130324349])
 
 const App = () => {
     const [destinations, setDestinations] = useState({
@@ -92,6 +93,7 @@ const App = () => {
         return (
             <Marker
                 position={[destinations[id].latitude, destinations[id].longitude]}
+                zIndex={-1}
                 eventHandlers={{
                     click: () => {
                         if (currentDest === null || pull) {
@@ -104,13 +106,14 @@ const App = () => {
                     },
                 }}
                 icon={
-                    <Center bg={currentDest === id ? 'limegreen' : 'red'} rounded={8} fontSize="24px" px={32} py={8}>
+                    <Center bg={currentDest === id ? 'limegreen' : 'red'} rounded={8} fontSize="32px" px={32} py={8} zIndex={-1}>
                         {id}
                     </Center>
                 }
             ></Marker>
         )
     }
+
 
     const Cart = () => {
         const [gps, setGPS] = useState(lastGPS.current)
@@ -124,30 +127,29 @@ const App = () => {
 
         return (
             <Marker
+                zIndex={9999}
                 icon={
-                    <Circle bg="orange" position="absolute" p="10px" boxShadow="dark-lg">
+                    <Circle bg="orange" position="absolute" p="10px" boxShadow="0 0 19px black" zIndex={9999} css={{zIndex:9999}}>
                         <Icon as={RiTaxiFill} boxSize={32} color="black" />
                     </Circle>
+                
                 }
                 position={[gps.latitude, gps.longitude]}
             ></Marker>
         )
     }
-
     const RenderPath = () => {
         const [path, setPath] = useState([...pathRef.current])
         socket.on('path', (x) => {
             pathRef.current = x.map((x) => {
-                return gpsToPixels(x)
+                return [x.latitude,x.longitude]
             })
 
             setPath([...pathRef.current])
         })
         return (
             path.length > 0 && (
-                <svg style={{ position: 'absolute' }} viewBox="0 0 1920 1080">
-                    <PathLine points={path} stroke="#10c400" strokeWidth="5" fill="none" r={5} />
-                </svg>
+                <Polyline weight={32} positions={path} color="orange" lineCap='round' opacity={.7} smoothFactor={8} />
             )
         )
     }
@@ -242,6 +244,8 @@ const App = () => {
         )
     }
 
+
+
     return (
         <>
             <MapContainer
@@ -249,14 +253,20 @@ const App = () => {
                 center={position}
                 ref={ref}
                 zoom={19}
+                dragging={false}
                 maxZoom={19}
                 minZoom={19}
             >
-                <ImageOverlay url="/newmap.jpg" bounds={bounds} zIndex={0} />
-                <Cart />
+                <ImageOverlay url="/satnew.png" bounds={bounds} zIndex={0} />
+              
+                
                 {Object.keys(destinations).map((id) => {
                     return <Destination key={id} id={id} />
                 })}
+                {state.state === 'transit-start' && <RenderPath />}
+            
+                <Cart />
+
             </MapContainer>
             <Flex
                 pointerEvents="none"
@@ -271,7 +281,7 @@ const App = () => {
             >
                 {/* <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" /> */}
 
-                {state.state === 'transit-start' && <RenderPath />}
+             
 
                 <ModalConfirm />
                 {/* <Button colorScheme="blue" position="absolute" right={10} bottom={10} onClick={() => setView(!view)}>
@@ -279,8 +289,9 @@ const App = () => {
                 </Button> */}
                 {currentDest && !pull && (
                     <>
-                        <Flex left={10} bottom={10} position="absolute" fontSize="3xl" po>
+                        <Flex left={10} bottom={10} position="absolute" fontSize="3xl" >
                             <Box
+                                pointerEvents='auto'
                                 bg="red.500"
                                 color="white"
                                 p={2}
@@ -354,7 +365,7 @@ const App = () => {
                     </>
                 )}
 
-                {state.active && <FullScreenMessage title="Cart is offline..." />}
+                {   !state.active && <FullScreenMessage title="Cart is offline..." />}
                 {state.state === 'transit-end' && (
                     <FullScreenMessage
                         title="You have arrived at your destination. Exit the cart safely or select a new destination."
