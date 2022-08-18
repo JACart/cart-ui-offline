@@ -19,6 +19,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
 import { convertGeoToPixel } from './GPSUtils'
+
 // import map from './images/map.png'
 // import sat from './images/sat.png'
 import { PathLine } from 'react-svg-pathline'
@@ -28,8 +29,8 @@ import { ImageOverlay, MapContainer } from 'react-leaflet'
 import Marker from 'react-leaflet-enhanced-marker'
 
 const socket = io('http://localhost:8021/ui')
-const position = [38.43334869007554, -78.86274221144595]
-const bounds = new LatLngBounds([38.443363, -78.87755], [38.42915035514814, -78.85702218643952])
+const position = [38.4330762517706, -78.86152024308338]
+const bounds = new LatLngBounds([38.434993460023776, -78.86510684108488], [38.431858478265596, -78.85740130324349])
 
 const App = () => {
     const [destinations, setDestinations] = useState({
@@ -40,8 +41,8 @@ const App = () => {
     })
     const [pose, setPose] = useState({ passenger: false, safe: false })
     const lastGPS = useRef({
-        latitude: 38.433905,
-        longitude: -78.862169,
+        latitude: 38.433168,
+        longitude: -78.86098,
     })
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
@@ -92,6 +93,8 @@ const App = () => {
         return (
             <Marker
                 position={[destinations[id].latitude, destinations[id].longitude]}
+                zIndex={2}
+                pane={'markerPane'}
                 eventHandlers={{
                     click: () => {
                         if (currentDest === null || pull) {
@@ -124,9 +127,12 @@ const App = () => {
 
         return (
             <Marker
+                zIndex={9999}
+                pane={'markerPane'}
                 icon={
-                    <Circle bg="orange" position="absolute" p="10px" boxShadow="dark-lg">
+                    <Circle bg="orange" position="absolute" p="10px" boxShadow="0 0 19px black" zIndex={9999}>
                         <Icon as={RiTaxiFill} boxSize={32} color="black" />
+                        {/* <PuffLoader /> */}
                     </Circle>
                 }
                 position={[gps.latitude, gps.longitude]}
@@ -252,11 +258,11 @@ const App = () => {
                 maxZoom={19}
                 minZoom={19}
             >
-                <ImageOverlay url="/newmap.jpg" bounds={bounds} zIndex={0} />
-                <Cart />
+                <ImageOverlay url="/satnew.png" bounds={bounds} zIndex={0} />
                 {Object.keys(destinations).map((id) => {
                     return <Destination key={id} id={id} />
                 })}
+                <Cart />
             </MapContainer>
             <Flex
                 pointerEvents="none"
