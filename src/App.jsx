@@ -28,11 +28,11 @@ import { MapInteractionCSS } from 'react-map-interaction';
 import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
-import { convertGeoToPixel } from './GPSUtils'
-import map from './images/map.png'
-// import map from './images/newmap.jpg'
-import sat from './images/sat.png'
-// import sat from './images/newsat.jpg'
+import { convertGeoToPixel, convertGeoToPixelBig } from './GPSUtils'
+// import map from './images/map.png'
+import map from './images/newmap.jpg'
+// import sat from './images/sat.png'
+import sat from './images/newsat.jpg'
 import { PathLine } from 'react-svg-pathline'
 import './App.css'
 
@@ -114,7 +114,7 @@ const App = () => {
         // const heightOffset = (window.innerHeight - 909) / 2 + 70
         console.log("width: " + window.innerWidth)
         console.log('height: ' + window.innerHeight)
-        let { x, y } = convertGeoToPixel(latitude, longitude)
+        let { x, y } = convertGeoToPixelBig(latitude, longitude)
         //return { x: x + widthOffeset, y: y + heightOffset }
         return { x: x, y: y}
     }
