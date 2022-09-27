@@ -28,11 +28,11 @@ import { MapInteractionCSS } from 'react-map-interaction';
 import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
-import { convertGeoToPixel, convertGeoToPixelBig } from './GPSUtils'
-// import map from './images/map.png'
-import map from './images/newmap.jpg'
-// import sat from './images/sat.png'
-import sat from './images/newsat.jpg'
+import { convertGeoToPixel } from './GPSUtils'
+import map from './images/map.png'
+import mapfull from './images/newmap.jpg'
+import sat from './images/sat.png'
+import satfull from './images/newsat.jpg'
 import { PathLine } from 'react-svg-pathline'
 import './App.css'
 
@@ -71,8 +71,8 @@ const App = () => {
     })
     const [listening, setListening] = useState()
     const [mph, setMph] = useState(0)
-    const [fullMap, setFullMap] = useState(false);
-
+    const [fullMap, setFullMap] = useState(false)
+    
     useEffect(() => {
         socket.on('get-destinations', (data) => {
             setDestinations(data)
@@ -110,6 +110,7 @@ const App = () => {
         })
 
         socket.on('fullMap', (data) => {
+            console.log("fullMap: " + data)
             setFullMap(data)
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,9 +119,7 @@ const App = () => {
     function gpsToPixels({ latitude, longitude }) {
         // const widthOffeset = (window.innerWidth - 1583) / 2 - 120
         // const heightOffset = (window.innerHeight - 909) / 2 + 70
-        console.log("width: " + window.innerWidth)
-        console.log('height: ' + window.innerHeight)
-        let { x, y } = convertGeoToPixelBig(latitude, longitude)
+        let { x, y } = convertGeoToPixel(latitude, longitude)
         //return { x: x + widthOffeset, y: y + heightOffset }
         return { x: x, y: y}
     }
@@ -384,7 +383,10 @@ const App = () => {
                     return <Destination key={id} id={id} />
                 })}
                 
-                <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />
+                {fullMap ? 
+                <Image src={view ? mapfull : satfull} w={window.innerWidth} objectFit="contain" />
+                :
+                <Image src={view ? map : sat} w={window.innerWidth} objectFit="contain" />}
                 <css position='relative'><svg style={{ position: 'absolute' }} viewBox="0 0 4000 4000" >
                     {state.state === 'transit-start' && <RenderPath/>}
                 </svg></css>
@@ -497,8 +499,7 @@ const App = () => {
                 </>
             )}
 
-            {/* {!state.active && <FullScreenMessage title="Cart is offline..." />} */}
-            {fullMap && <FullScreenMessage title="Full Map" />}
+            {!state.active && <FullScreenMessage title="Cart is offline..." />}
             {state.state === 'transit-end' && (
                 <FullScreenMessage
                     title="You have arrived at your destination. Exit the cart safely or select a new destination."
