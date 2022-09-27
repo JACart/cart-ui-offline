@@ -45,6 +45,7 @@ const App = () => {
             longitude: -78.86098,
             name: "Home",
             speech: "Home",
+            fullMap: false,
         },
     })
     const [pose, setPose] = useState({ passenger: false, safe: false })
@@ -70,6 +71,7 @@ const App = () => {
     })
     const [listening, setListening] = useState()
     const [mph, setMph] = useState(0)
+    const [fullMap, setFullMap] = useState(false);
 
     useEffect(() => {
         socket.on('get-destinations', (data) => {
@@ -105,6 +107,10 @@ const App = () => {
 
         socket.on('mph', (data) => {
             setMph(data)
+        })
+
+        socket.on('fullMap', (data) => {
+            setFullMap(data)
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -194,41 +200,45 @@ const App = () => {
 
     const Destination = ({ id }) => {
         const { x, y } = gpsToPixels(destinations[id])
-        return (
-            <Center
-                position="absolute"
-                bg={currentDest === id ? 'limegreen' : 'red'}
-                left={x - 15}
-                // left={x}
-                top={y}
-                // boxSize={2}
-                rounded={8}
-                fontSize={10}
-                px={2}
-                py={1}
-                onClick={() => {
-                    if (currentDest === null || pull) {
-                        if (pull) {
-                            setCurrentDest(null)
-                            setPull(false)
+        if(!destinations[id].fullMap || (destinations[id].fullMap && fullMap)) {
+            return (
+                <Center
+                    position="absolute"
+                    bg={currentDest === id ? 'limegreen' : 'red'}
+                    left={x - 15}
+                    // left={x}
+                    top={y}
+                    // boxSize={2}
+                    rounded={8}
+                    fontSize={10}
+                    px={2}
+                    py={1}
+                    onClick={() => {
+                        if (currentDest === null || pull) {
+                            if (pull) {
+                                setCurrentDest(null)
+                                setPull(false)
+                            }
+                            setModal({ type: 'destination-pick', destination: id })
                         }
-                        setModal({ type: 'destination-pick', destination: id })
-                    }
-                }}
-                onTouchStart={() => {
-                    if (currentDest === null || pull) {
-                        if (pull) {
-                            setCurrentDest(null)
-                            setPull(false)
+                    }}
+                    onTouchStart={() => {
+                        if (currentDest === null || pull) {
+                            if (pull) {
+                                setCurrentDest(null)
+                                setPull(false)
+                            }
+                            setModal({ type: 'destination-pick', destination: id })
                         }
-                        setModal({ type: 'destination-pick', destination: id })
-                    }
-                }}
-                cursor="pointer"
-            >
-                {destinations[id].name}
-            </Center>
-        )
+                    }}
+                    cursor="pointer"
+                >
+                    {destinations[id].name}
+                </Center>
+            )
+        } else {
+            return "";
+        }
     }
 
     const Cart = () => {
@@ -487,7 +497,8 @@ const App = () => {
                 </>
             )}
 
-            {!state.active && <FullScreenMessage title="Cart is offline..." />}
+            {/* {!state.active && <FullScreenMessage title="Cart is offline..." />} */}
+            {fullMap && <FullScreenMessage title="Full Map" />}
             {state.state === 'transit-end' && (
                 <FullScreenMessage
                     title="You have arrived at your destination. Exit the cart safely or select a new destination."
