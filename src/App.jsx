@@ -126,30 +126,34 @@ const App = () => {
 
 
     const DestinationMenuItem = ({ id }) => {
-        return (
-            <Box>
-                <Center
-                    position="absolute"
-                    bg={currentDest === id ? 'limegreen' : 'red'}
-                    rounded={8}
-                    fontSize="4xl"
-                    px={5}
-                    py={1}
-                    onClick={() => {
-                        if (currentDest === null || pull) {
-                            if (pull) {
-                                setCurrentDest(null)
-                                setPull(false)
+        if(!destinations[id].fullMap || (destinations[id].fullMap && fullMap)) {
+            return (
+                <Box>
+                    <Center
+                        position="absolute"
+                        bg={currentDest === id ? 'limegreen' : 'red'}
+                        rounded={8}
+                        fontSize="4xl"
+                        px={5}
+                        py={1}
+                        onClick={() => {
+                            if (currentDest === null || pull) {
+                                if (pull) {
+                                    setCurrentDest(null)
+                                    setPull(false)
+                                }
+                                setModal({ type: 'destination-pick', destination: id })
                             }
-                            setModal({ type: 'destination-pick', destination: id })
-                        }
-                    }}
-                    cursor="pointer"
-                >
-                    {id}
-                </Center>
-            </Box>
-        )
+                        }}
+                        cursor="pointer"
+                    >
+                        {id}
+                    </Center>
+                </Box>
+            )
+        } else {
+            return "";
+        }
     }
 
     function DestinationMenu() {
