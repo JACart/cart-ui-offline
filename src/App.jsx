@@ -28,7 +28,7 @@ import { MapInteractionCSS } from 'react-map-interaction';
 import React, { useEffect, useState, useRef } from 'react'
 import { RiFileInfoFill, RiTaxiFill } from 'react-icons/ri'
 import io from 'socket.io-client'
-import { convertGeoToPixel } from './GPSUtils'
+import { convertGeoToPixel, convertGeoToPixelBig } from './GPSUtils'
 import map from './images/map.png'
 import mapfull from './images/newmap.jpg'
 import sat from './images/sat.png'
@@ -119,9 +119,14 @@ const App = () => {
     function gpsToPixels({ latitude, longitude }) {
         // const widthOffeset = (window.innerWidth - 1583) / 2 - 120
         // const heightOffset = (window.innerHeight - 909) / 2 + 70
-        let { x, y } = convertGeoToPixel(latitude, longitude)
+        var pixels = 0;
+        if (fullMap) {
+            pixels = convertGeoToPixelBig(latitude, longitude)
+        } else {
+            pixels = convertGeoToPixel(latitude, longitude)
+        }
         //return { x: x + widthOffeset, y: y + heightOffset }
-        return { x: x, y: y}
+        return { x: pixels.x, y: pixels.y}
     }
 
 
