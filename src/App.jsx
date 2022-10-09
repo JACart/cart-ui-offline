@@ -72,6 +72,13 @@ const App = () => {
     const [listening, setListening] = useState()
     const [mph, setMph] = useState(0)
     const [fullMap, setFullMap] = useState(false)
+    const [research, setResearch] = useState(false)
+
+    const [preferences, setPreferences] = useState({
+        showControls: fullMap || research,
+        disableZoom: research && !fullMap,
+        disablePan: research && !fullMap,
+    })
     
     useEffect(() => {
         socket.on('get-destinations', (data) => {
@@ -110,8 +117,18 @@ const App = () => {
         })
 
         socket.on('fullMap', (data) => {
-            console.log("fullMap: " + data)
             setFullMap(data)
+        })
+
+        socket.on('research', (data) => {
+            console.log("Research: " + data)
+            setResearch(data)
+        })
+
+        setPreferences({
+            showControls: fullMap || research,
+            disableZoom: research && !fullMap,
+            disablePan: research && !fullMap,
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -384,7 +401,7 @@ const App = () => {
                 //translationBounds={{xMin: -570, xMax: 0, yMin: -1220, yMax: 0}}
                 btnClass='btnStyle'
                 
-                showControls
+                {...preferences}
                 >
                 
                 <Cart />
