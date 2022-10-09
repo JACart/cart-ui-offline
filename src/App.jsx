@@ -73,12 +73,6 @@ const App = () => {
     const [mph, setMph] = useState(0)
     const [fullMap, setFullMap] = useState(false)
     const [research, setResearch] = useState(false)
-
-    const [preferences, setPreferences] = useState({
-        showControls: fullMap || research,
-        disableZoom: research && !fullMap,
-        disablePan: research && !fullMap,
-    })
     
     useEffect(() => {
         socket.on('get-destinations', (data) => {
@@ -121,17 +115,18 @@ const App = () => {
         })
 
         socket.on('research', (data) => {
-            console.log("Research: " + data)
             setResearch(data)
-        })
-
-        setPreferences({
-            showControls: fullMap || research,
-            disableZoom: research && !fullMap,
-            disablePan: research && !fullMap,
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    function MapPreferences() {
+        return {
+            showControls: !research,
+            disablePan: research && !fullMap,
+            disableZoom: research && !fullMap
+        };
+    }
 
     function gpsToPixels({ latitude, longitude }) {
         // const widthOffeset = (window.innerWidth - 1583) / 2 - 120
@@ -394,14 +389,12 @@ const App = () => {
     return (
         
         <Flex w="100vw" h="100vh" justify="center" bg={view ? '#F6F7F9' : '#4E5C44'} overflow="hidden">
-            
             <MapInteractionCSS
                 maxScale={4}
                 minScale={1}
                 //translationBounds={{xMin: -570, xMax: 0, yMin: -1220, yMax: 0}}
                 btnClass='btnStyle'
-                
-                {...preferences}
+                {...MapPreferences()}
                 >
                 
                 <Cart />
