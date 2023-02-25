@@ -54,6 +54,7 @@ const App = () => {
         longitude: -78.862169,
     })
     const [speed,setSpeed] = useState(9)
+    const [poseOOB, setOOB] = useState(false)
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
     const [modal, setModal] = useState({ type: null })
@@ -116,6 +117,14 @@ const App = () => {
 
         socket.on('research', (data) => {
             setResearch(data)
+        })
+
+        socket.on('pose-oob', (data) => {
+            setOOB(data)
+            //console.log(data)
+            //console.log(".")
+            //console.log(poseOOB)
+            //console.log("------")
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -526,6 +535,12 @@ const App = () => {
                 />
             )}
             {pose.passenger && !pose.safe && (
+                <FullScreenMessage
+                    title="Please adjust yourself and be seated properly. Unsafe pose detected."
+                    onPress={() => {}}
+                />
+            )}
+            {poseOOB && (
                 <FullScreenMessage
                     title="Please adjust yourself and be seated properly. Unsafe pose detected."
                     onPress={() => {}}
