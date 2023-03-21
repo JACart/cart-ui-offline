@@ -48,13 +48,13 @@ const App = () => {
             fullMap: false,
         },
     })
-    const [pose, setPose] = useState({ passenger: false, safe: false })
     const lastGPS = useRef({
         latitude: 38.433905,
         longitude: -78.862169,
     })
     const [speed,setSpeed] = useState(9)
     const [poseOOB, setOOB] = useState(false)
+    const [occupants, setOccupants] = useState(0)
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
     const [modal, setModal] = useState({ type: null })
@@ -79,10 +79,6 @@ const App = () => {
         socket.on('get-destinations', (data) => {
             setDestinations(data)
         })
-        socket.on('pose', (x) => {
-            setPose(x)
-        })
-
         socket.on('ui-init', (data) => {
             setState(data)
             if (data.state === 'transit-end' || data.state === 'summon-finish') {
@@ -121,10 +117,10 @@ const App = () => {
 
         socket.on('pose-oob', (data) => {
             setOOB(data)
-            //console.log(data)
-            //console.log(".")
-            //console.log(poseOOB)
-            //console.log("------")
+        })
+
+        socket.on('occupants', (data) => {
+            setOccupants(data)
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -163,7 +159,7 @@ const App = () => {
                         px={5}
                         py={1}
                         onClick={() => {
-                            if (currentDest === null || pull) {
+                            if (currentDest === null || pull || occupants < 1) { /* --------------------------------- */
                                 if (pull) {
                                     setCurrentDest(null)
                                     setPull(false)
@@ -243,7 +239,7 @@ const App = () => {
                     px={2}
                     py={1}
                     onClick={() => {
-                        if (currentDest === null || pull) {
+                        if (currentDest === null || pull || occupants < 1) {
                             if (pull) {
                                 setCurrentDest(null)
                                 setPull(false)
@@ -534,13 +530,7 @@ const App = () => {
                     onPress={() => {}}
                 />
             )}
-            {pose.passenger && !pose.safe && (
-                <FullScreenMessage
-                    title="Please adjust yourself and be seated properly. Unsafe pose detected."
-                    onPress={() => {}}
-                />
-            )}
-            {poseOOB && (
+            {poseOOB && /*state.state == 'transit-start' &&*/ (
                 <FullScreenMessage
                     title="Please adjust yourself and be seated properly. Unsafe pose detected."
                     onPress={() => {}}
