@@ -54,6 +54,7 @@ const App = () => {
     })
     const [speed,setSpeed] = useState(9)
     const [poseOOB, setOOB] = useState(false)
+    const [passengerReady, setPassengerReady] = useState(true)
     const [occupants, setOccupants] = useState(0)
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
@@ -146,6 +147,10 @@ const App = () => {
         return { x: pixels.x, y: pixels.y}
     }
 
+    function clearTimedMessage() {
+        setPassengerReady(true)
+    }
+
 
     const DestinationMenuItem = ({ id }) => {
         if(!destinations[id].fullMap || (destinations[id].fullMap && fullMap)) {
@@ -159,12 +164,15 @@ const App = () => {
                         px={5}
                         py={1}
                         onClick={() => {
-                            if (currentDest === null || pull || occupants < 1) { /* --------------------------------- */
+                            if ((currentDest === null || pull) && occupants > 0) {
                                 if (pull) {
                                     setCurrentDest(null)
                                     setPull(false)
                                 }
                                 setModal({ type: 'destination-pick', destination: id })
+                            } else if (occupants <= 0) {
+                                setPassengerReady(false)
+                                setTimeout(clearTimedMessage, 3000)
                             }
                         }}
                         cursor="pointer"
@@ -239,21 +247,27 @@ const App = () => {
                     px={2}
                     py={1}
                     onClick={() => {
-                        if (currentDest === null || pull || occupants < 1) {
+                        if ((currentDest === null || pull) && occupants > 0) {
                             if (pull) {
                                 setCurrentDest(null)
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
+                        } else if (occupants <= 0) {
+                            setPassengerReady(false)
+                            setTimeout(clearTimedMessage, 3000)
                         }
                     }}
                     onTouchStart={() => {
-                        if (currentDest === null || pull) {
+                        if ((currentDest === null || pull) && occupants > 0) {
                             if (pull) {
                                 setCurrentDest(null)
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
+                        } else if (occupants <= 0) {
+                            setPassengerReady(false)
+                            setTimeout(clearTimedMessage, 3000)
                         }
                     }}
                     cursor="pointer"
@@ -533,6 +547,12 @@ const App = () => {
             {poseOOB && /*state.state == 'transit-start' &&*/ (
                 <FullScreenMessage
                     title="Please adjust yourself and be seated properly. Unsafe pose detected."
+                    onPress={() => {}}
+                />
+            )}
+            {!passengerReady && (
+                <FullScreenMessage
+                    title="Please be seated safely before selecting a destination."
                     onPress={() => {}}
                 />
             )}
