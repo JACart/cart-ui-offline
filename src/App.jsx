@@ -55,7 +55,10 @@ const App = () => {
     const [speed,setSpeed] = useState(9)
     const [poseOOB, setOOB] = useState(false)
     const [passengerReady, setPassengerReady] = useState(true)
-    const [occupants, setOccupants] = useState(0)
+    const [occupantStop, setOccupantStop] = useState(false)
+    const [occupantStopCount, setOcccupantStopCount] = useState(0)
+    const [startingOccupants, setStartingOccupants] = useState(1)
+    const [occupants, setOccupants] = useState(1)
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
     const [modal, setModal] = useState({ type: null })
@@ -126,6 +129,21 @@ const App = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    useEffect(() => {
+        if (occupants != startingOccupants && !pull && currentDest != null) {
+            setOcccupantStopCount(occupantStopCount + 1)
+        } else {
+            setOcccupantStopCount(0)
+        }
+
+        if (occupantStopCount > 5) {
+            setPull(true)
+            socket.emit('pullover', true)
+            setOccupantStop(true)
+            setTimeout(clearTimedMessage, 5000)
+        }
+    }, [occupants, startingOccupants, pull, currentDest, occupantStopCount])
+
     function MapPreferences() {
         return {
             showControls: !research,
@@ -149,8 +167,8 @@ const App = () => {
 
     function clearTimedMessage() {
         setPassengerReady(true)
+        setOccupantStop(false)
     }
-
 
     const DestinationMenuItem = ({ id }) => {
         if(!destinations[id].fullMap || (destinations[id].fullMap && fullMap)) {
@@ -164,13 +182,13 @@ const App = () => {
                         px={5}
                         py={1}
                         onClick={() => {
-                            if ((currentDest === null || pull) && occupants > 0) {
+                            if ((currentDest === null || pull) && occupants > 0 && !poseOOB) {
                                 if (pull) {
                                     setCurrentDest(null)
                                     setPull(false)
                                 }
                                 setModal({ type: 'destination-pick', destination: id })
-                            } else if (occupants <= 0) {
+                            } else if (occupants <= 0 || poseOOB) {
                                 setPassengerReady(false)
                                 setTimeout(clearTimedMessage, 3000)
                             }
@@ -247,25 +265,27 @@ const App = () => {
                     px={2}
                     py={1}
                     onClick={() => {
-                        if ((currentDest === null || pull) && occupants > 0) {
+                        if ((currentDest === null || pull) && occupants > 0 && !poseOOB) {
                             if (pull) {
                                 setCurrentDest(null)
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
-                        } else if (occupants <= 0) {
+                            setStartingOccupants(occupants)
+                        } else if (occupants <= 0 || poseOOB) {
                             setPassengerReady(false)
                             setTimeout(clearTimedMessage, 3000)
                         }
                     }}
                     onTouchStart={() => {
-                        if ((currentDest === null || pull) && occupants > 0) {
+                        if ((currentDest === null || pull) && occupants > 0 && !poseOOB) {
                             if (pull) {
                                 setCurrentDest(null)
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
-                        } else if (occupants <= 0) {
+                            setStartingOccupants(occupants)
+                        } else if (occupants <= 0 || poseOOB) {
                             setPassengerReady(false)
                             setTimeout(clearTimedMessage, 3000)
                         }
@@ -293,7 +313,8 @@ const App = () => {
         const { x, y } = gpsToPixels(gps)
         return (
             <Circle bg="orange" left={x} top={y} position="absolute" p="8px" boxShadow="dark-lg">
-                <Icon as={RiTaxiFill} boxSize={4} color="black" />
+                <Icon as={RiTaxiFill} boxSize={4} colo
+r="black" />
             </Circle>
         )
     }
@@ -506,8 +527,14 @@ const App = () => {
                             shadow="dark-lg"
                             cursor="pointer"
                             onClick={() => {
-                                setPull(false)
-                                socket.emit('pullover', false)
+                                if (occupants > 0 && !poseOOB) {
+                                    setStartingOccupants(occupants)
+                                    setPull(false)
+                                    socket.emit('pullover', false)
+                                } else {
+                                    setPassengerReady(false)
+                                    setTimeout(clearTimedMessage, 3000)
+                                }
                             }}
                         >
                             Resume
@@ -544,7 +571,7 @@ const App = () => {
                     onPress={() => {}}
                 />
             )}
-            {poseOOB && /*state.state == 'transit-start' &&*/ (
+            {poseOOB && !pull && currentDest != null && (
                 <FullScreenMessage
                     title="Please adjust yourself and be seated properly. Unsafe pose detected."
                     onPress={() => {}}
@@ -554,6 +581,12 @@ const App = () => {
                 <FullScreenMessage
                     title="Please be seated safely before selecting a destination."
                     onPress={() => {}}
+                />
+            )}
+            {occupantStop && (
+                <FullScreenMessage
+                title="Passenger has exited the vehicle. Pulling Over."
+                onPress={() => {}}
                 />
             )}
             <Flex position='absolute' top='0' left='0' m={12}>
