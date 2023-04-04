@@ -56,8 +56,6 @@ const App = () => {
     const [poseOOB, setOOB] = useState(false)
     const [passengerReady, setPassengerReady] = useState(true)
     const [occupantStop, setOccupantStop] = useState(false)
-    const [occupantStopCount, setOcccupantStopCount] = useState(0)
-    const [startingOccupants, setStartingOccupants] = useState(1)
     const [occupants, setOccupants] = useState(1)
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
@@ -126,23 +124,17 @@ const App = () => {
         socket.on('occupants', (data) => {
             setOccupants(data)
         })
+
+        socket.on('passenger-emergency-stop', (data) => {
+            if (data && !pull) {
+                setPull(true)
+                socket.emit('pullover', true)
+                setOccupantStop(true)
+                setTimeout(clearTimedMessage, 5000)
+            }
+        })
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    useEffect(() => {
-        if (occupants != startingOccupants && !pull && currentDest != null) {
-            setOcccupantStopCount(occupantStopCount + 1)
-        } else {
-            setOcccupantStopCount(0)
-        }
-
-        if (occupantStopCount > 5) {
-            setPull(true)
-            socket.emit('pullover', true)
-            setOccupantStop(true)
-            setTimeout(clearTimedMessage, 5000)
-        }
-    }, [occupants, startingOccupants, pull, currentDest, occupantStopCount])
+    }, [pull])
 
     function MapPreferences() {
         return {
@@ -271,7 +263,6 @@ const App = () => {
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
-                            setStartingOccupants(occupants)
                         } else if (occupants <= 0 || poseOOB) {
                             setPassengerReady(false)
                             setTimeout(clearTimedMessage, 3000)
@@ -284,7 +275,6 @@ const App = () => {
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
-                            setStartingOccupants(occupants)
                         } else if (occupants <= 0 || poseOOB) {
                             setPassengerReady(false)
                             setTimeout(clearTimedMessage, 3000)
@@ -313,8 +303,7 @@ const App = () => {
         const { x, y } = gpsToPixels(gps)
         return (
             <Circle bg="orange" left={x} top={y} position="absolute" p="8px" boxShadow="dark-lg">
-                <Icon as={RiTaxiFill} boxSize={4} colo
-r="black" />
+                <Icon as={RiTaxiFill} boxSize={4} color="black" />
             </Circle>
         )
     }
@@ -528,7 +517,6 @@ r="black" />
                             cursor="pointer"
                             onClick={() => {
                                 if (occupants > 0 && !poseOOB) {
-                                    setStartingOccupants(occupants)
                                     setPull(false)
                                     socket.emit('pullover', false)
                                 } else {
