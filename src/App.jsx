@@ -126,15 +126,15 @@ const App = () => {
         })
 
         socket.on('passenger-emergency-stop', (data) => {
-            if (data && !pull) {
-                setPull(true)
-                socket.emit('pullover', true)
-                setOccupantStop(true)
-                setTimeout(clearTimedMessage, 5000)
-            }
+            console.log("received")
+            setPull(true)
+            socket.emit('pullover', true)
+            setOccupantStop(true)    
+            setTimeout(clearTimedMessage, 5000)
+            
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pull])
+    }, [])
 
     function MapPreferences() {
         return {
