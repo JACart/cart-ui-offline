@@ -53,9 +53,10 @@ const App = () => {
         longitude: -78.862169,
     })
     const [speed,setSpeed] = useState(9)
-    const [poseOOB, setOOB] = useState(false)
+    const [unsafePose, setUnsafePose] = useState(false)
     const [passengerReady, setPassengerReady] = useState(true)
-    const [occupantStop, setOccupantStop] = useState(false)
+    const [passengerExitStop, setPassengerExitStop] = useState(false)
+    const [unsafePoseStop, setUnsafePoseStop] = useState(false)
     const [occupants, setOccupants] = useState(1)
     const [pull, setPull] = useState(false)
     const [view, setView] = useState(true)
@@ -117,8 +118,8 @@ const App = () => {
             setResearch(data)
         })
 
-        socket.on('pose-oob', (data) => {
-            setOOB(data)
+        socket.on('unsafe-pose', (data) => {
+            setUnsafePose(data)
         })
 
         socket.on('occupants', (data) => {
@@ -126,10 +127,13 @@ const App = () => {
         })
 
         socket.on('passenger-emergency-stop', (data) => {
-            console.log("received")
             setPull(true)
             socket.emit('pullover', true)
-            setOccupantStop(true)    
+            if (data == 'unsafe-pose-stop') {
+                setUnsafePoseStop(true)
+            } else if (data == 'passenger-exit-stop') {
+                setPassengerExitStop(true)
+            }  
             setTimeout(clearTimedMessage, 5000)
             
         })
@@ -159,7 +163,8 @@ const App = () => {
 
     function clearTimedMessage() {
         setPassengerReady(true)
-        setOccupantStop(false)
+        setPassengerExitStop(false)
+        setUnsafePoseStop(false)
     }
 
     const DestinationMenuItem = ({ id }) => {
@@ -174,13 +179,13 @@ const App = () => {
                         px={5}
                         py={1}
                         onClick={() => {
-                            if ((currentDest === null || pull) && occupants > 0 && !poseOOB) {
+                            if ((currentDest === null || pull) && occupants > 0 && !unsafePose) {
                                 if (pull) {
                                     setCurrentDest(null)
                                     setPull(false)
                                 }
                                 setModal({ type: 'destination-pick', destination: id })
-                            } else if (occupants <= 0 || poseOOB) {
+                            } else if (occupants <= 0 || unsafePose) {
                                 setPassengerReady(false)
                                 setTimeout(clearTimedMessage, 3000)
                             }
@@ -257,25 +262,25 @@ const App = () => {
                     px={2}
                     py={1}
                     onClick={() => {
-                        if ((currentDest === null || pull) && occupants > 0 && !poseOOB) {
+                        if ((currentDest === null || pull) && occupants > 0 && !unsafePose) {
                             if (pull) {
                                 setCurrentDest(null)
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
-                        } else if (occupants <= 0 || poseOOB) {
+                        } else if (occupants <= 0 || unsafePose) {
                             setPassengerReady(false)
                             setTimeout(clearTimedMessage, 3000)
                         }
                     }}
                     onTouchStart={() => {
-                        if ((currentDest === null || pull) && occupants > 0 && !poseOOB) {
+                        if ((currentDest === null || pull) && occupants > 0 && !unsafePose) {
                             if (pull) {
                                 setCurrentDest(null)
                                 setPull(false)
                             }
                             setModal({ type: 'destination-pick', destination: id })
-                        } else if (occupants <= 0 || poseOOB) {
+                        } else if (occupants <= 0 || unsafePose) {
                             setPassengerReady(false)
                             setTimeout(clearTimedMessage, 3000)
                         }
@@ -516,7 +521,7 @@ const App = () => {
                             shadow="dark-lg"
                             cursor="pointer"
                             onClick={() => {
-                                if (occupants > 0 && !poseOOB) {
+                                if (occupants > 0 && !unsafePose) {
                                     setPull(false)
                                     socket.emit('pullover', false)
                                 } else {
@@ -559,24 +564,33 @@ const App = () => {
                     onPress={() => {}}
                 />
             )}
-            {poseOOB && !pull && currentDest != null && (
+            {unsafePose && !pull && currentDest != null
+            && (
                 <FullScreenMessage
                     title="Please adjust yourself and be seated properly. Unsafe pose detected."
                     onPress={() => {}}
                 />
             )}
-            {!passengerReady && (
+            { !passengerReady && (
                 <FullScreenMessage
                     title="Please be seated safely before selecting a destination."
                     onPress={() => {}}
                 />
             )}
-            {occupantStop && (
+            {unsafePoseStop && (
                 <FullScreenMessage
-                title="Passenger has exited the vehicle. Pulling Over."
+                title="Passenger unsafe. Pulling Over."
                 onPress={() => {}}
                 />
             )}
+            {passengerExitStop && (
+                <FullScreenMessage
+                title="Passenger exited vehicle. Pulling Over."
+                onPress={() => {}}
+                />
+            )}
+
+            {/*}
             <Flex position='absolute' top='0' left='0' m={12}>
                 <Button bg={speed===4?'red.400':'gray.600'} _hover={{bg:'grey.800'}} size='lg' mr={4} onClick={()=>{
                     socket.emit('speed', 4.0)
@@ -598,6 +612,8 @@ const App = () => {
                 }}>Turbo</Button>
 
             </Flex>
+            */}
+
         </Flex>
        
         
