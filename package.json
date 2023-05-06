@@ -13,11 +13,14 @@
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
         "react-icons": "^4.2.0",
-        "react-offline-map": "^0.3.0",
-        "react-scripts": "4.0.3",
+        "react-inlinesvg": "^3.0.0",
+        "react-map-interaction": "^2.1.0",
+        "react-offline-map": "^0.1.5",
+        "react-scripts": "^5.0.0",
         "react-svg-pathline": "^0.5.0",
         "socket.io-client": "^2.3.0",
-        "web-vitals": "^1.0.1"
+        "web-vitals": "^1.0.1",
+        "webpack": "^5.72.0"
     },
     "scripts": {
         "start": "react-scripts start",
